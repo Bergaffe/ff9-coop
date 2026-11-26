@@ -38,6 +38,7 @@ namespace FF9Coop
                 if (Ui.SoloScenePrompt.IsOpen)
                     return;
                 BattleTurnRequest.Update();
+                BattleCoop.Update();
                 LeaderControl.Update();
                 Companion.Update(); // fängt eigene Fehler ab und schaltet sich nach 3 Fehlern ab
                 WorldCompanion.Update(); // dito, eigene 3D-Engine der Weltkarte
@@ -70,6 +71,17 @@ namespace FF9Coop
                     }
                 }
                 return;
+            }
+
+            // P1/P2-Markierung im Kampf (eigene Option, unabhängig vom Status-HUD)
+            try { BattleCoop.DrawMarkers(); }
+            catch (Exception ex)
+            {
+                if (!_guiErrorLogged)
+                {
+                    _guiErrorLogged = true;
+                    CoopLog.Error(ex, "Fehler beim Zeichnen der P1/P2-Markierung");
+                }
             }
 
             if (!CoopMod.Config.ShowHud || !CoopMod.Config.Enabled)

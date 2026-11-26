@@ -118,8 +118,8 @@ namespace FF9Coop.Game
         private static void Spawn(WMWorld world, WMActor leader, String code)
         {
             Destroy();
-            String geo = "GEO_MAIN_F0_" + code;
-            GameObject model = ModelFactory.CreateModel($"Models/main/{geo}/{geo}", false, true, Configuration.Graphics.WorldSmoothTexture);
+            String geo = code; // vollständiger Modellname, z. B. GEO_MAIN_F0_VIV oder GEO_SUB_F0_BTX
+            GameObject model = ModelFactory.CreateModel(geo, false, true, Configuration.Graphics.WorldSmoothTexture);
             if (model == null)
             {
                 CoopLog.Warning($"Weltkarten-Begleiter-Modell {geo} nicht gefunden");
@@ -135,7 +135,7 @@ namespace FF9Coop.Game
 
             s_anim = model.GetComponent<Animation>() ?? model.AddComponent<Animation>();
             foreach (String suffix in new[] { "IDLE", "WALK", "RUN" })
-                AnimationFactory.AddAnimWithAnimatioName(model, $"ANH_MAIN_F0_{code}_{suffix}");
+                AnimationFactory.AddAnimWithAnimatioName(model, Companion.AnimName(code, suffix));
             foreach (AnimationState state in s_anim)
                 state.wrapMode = WrapMode.Loop;
             foreach (Renderer r in model.GetComponentsInChildren<Renderer>())
@@ -231,7 +231,7 @@ namespace FF9Coop.Game
         {
             if (s_anim == null)
                 return;
-            String clip = $"ANH_MAIN_F0_{s_code}_{suffix}";
+            String clip = Companion.AnimName(s_code, suffix);
             if (clip == s_clip && s_anim.isPlaying)
                 return;
             if (s_anim.GetClip(clip) == null)

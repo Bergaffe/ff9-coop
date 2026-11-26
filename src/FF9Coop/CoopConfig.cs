@@ -44,6 +44,13 @@ namespace FF9Coop
         /// <summary>Maximaler Abstand zum Leader, danach wird der Begleiter zurückgeholt (Feld-Einheiten).</summary>
         public Single CompanionLeash = 2000f;
         public KeyCode CompanionRunKey = KeyCode.LeftShift;
+        /// <summary>ATB anhalten, solange ein Spieler im Kommandomenü wählt.</summary>
+        public Boolean BattlePauseWhileChoosing = false;
+        /// <summary>Kurze Vibration am Controller des Besitzers, wenn sein Charakter bereit ist.</summary>
+        public Boolean ReadySignal = true;
+        /// <summary>P1/P2-Markierung neben den Namen in der Kampf-Gruppenanzeige.</summary>
+        public Boolean BattleMarkers = true;
+
         /// <summary>"Wer spielt …?"-Fenster, wenn das Spiel die gesteuerte Figur wechselt.</summary>
         public Int32 SoloSceneMode = SoloAsk;
 
@@ -102,9 +109,27 @@ namespace FF9Coop
             cfg.CompanionRunKey = GetKey(ini, "Companion", "RunKey", cfg.CompanionRunKey);
             cfg.MenuKey = GetKey(ini, "Control", "MenuKey", cfg.MenuKey);
             cfg.WorldCompanionEnabled = GetBool(ini, "Companion", "WorldMap", cfg.WorldCompanionEnabled);
+            cfg.BattlePauseWhileChoosing = GetBool(ini, "Control", "BattlePause", cfg.BattlePauseWhileChoosing);
+            cfg.ReadySignal = GetBool(ini, "Control", "ReadySignal", cfg.ReadySignal);
+            cfg.BattleMarkers = GetBool(ini, "Control", "BattleMarkers", cfg.BattleMarkers);
             cfg.SoloSceneMode = ParseSoloMode(GetString(ini, "Control", "SoloScenePrompt", null), cfg.PlayerCount);
             if (Single.TryParse(GetString(ini, "Companion", "WorldLeash", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single wleash))
                 cfg.WorldLeash = Math.Max(2f, wleash);
+
+            // Zusätzliche/abweichende Begleiter-Modelle, z. B. für Charaktere aus anderen Mods
+            if (ini.TryGetValue("CompanionModels", out Dictionary<String, String> models))
+            {
+                foreach (KeyValuePair<String, String> kv in models)
+                {
+                    try
+                    {
+                        CharacterId id = (CharacterId)Enum.Parse(typeof(CharacterId), kv.Key, true);
+                        if (kv.Value.StartsWith("GEO_", StringComparison.OrdinalIgnoreCase))
+                            Game.Companion.SetModel(id, kv.Value.ToUpperInvariant());
+                    }
+                    catch { CoopLog.Warning($"[CompanionModels] Unbekannter Charakter '{kv.Key}'"); }
+                }
+            }
 
             if (ini.TryGetValue("owners", out Dictionary<String, String> owners))
             {
@@ -158,6 +183,9 @@ namespace FF9Coop
                 Set(lines, "Players", "Pad" + (i + 1), PadPlayer[i].ToString());
             Set(lines, "Control", "MenuControl", MenuControl.ToString());
             Set(lines, "Control", "BattleTurnRequest", BattleTurnRequest ? "1" : "0");
+            Set(lines, "Control", "BattlePause", BattlePauseWhileChoosing ? "1" : "0");
+            Set(lines, "Control", "ReadySignal", ReadySignal ? "1" : "0");
+            Set(lines, "Control", "BattleMarkers", BattleMarkers ? "1" : "0");
             Set(lines, "Control", "SoloScenePrompt",
                 SoloSceneMode == SoloAsk ? "Ask" : SoloSceneMode == SoloKeepLeader ? "Keep" : "P" + SoloSceneMode);
             Set(lines, "Companion", "Enabled", CompanionEnabled ? "1" : "0");

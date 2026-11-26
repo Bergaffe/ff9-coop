@@ -201,6 +201,12 @@ namespace FF9Coop.Ui
                 Header("(keine Party geladen)");
             Add("Zug anfordern", "Ist ein eigener Charakter bereit, holt ihn der wartende Spieler mit Y bzw. T.",
                 () => new[] { "An", "Aus" }, () => cfg.BattleTurnRequest ? 0 : 1, v => cfg.BattleTurnRequest = v == 0);
+            Add("ATB bei Befehlswahl", "„Anhalten“: Die Zeit steht still, solange ein Spieler im Kommandomenü wählt. Fair bei Absprachen, Online-Verzögerung und schweren Mods.",
+                () => new[] { "Wie im Spiel", "Anhalten" }, () => cfg.BattlePauseWhileChoosing ? 1 : 0, v => cfg.BattlePauseWhileChoosing = v == 1);
+            Add("Bereit-Signal", "Kurze Vibration am eigenen Controller, sobald einer deiner Charaktere bereit ist.",
+                () => new[] { "Vibration", "Aus" }, () => cfg.ReadySignal ? 0 : 1, v => cfg.ReadySignal = v == 0);
+            Add("P1/P2-Markierung", "Zeigt im Kampf neben jedem Namen, welcher Spieler den Charakter steuert.",
+                () => new[] { "An", "Aus" }, () => cfg.BattleMarkers ? 0 : 1, v => cfg.BattleMarkers = v == 0);
 
             Header("Begleiter");
             Add("Begleiter", "Zweite sichtbare Figur, gesteuert vom Spieler, der nicht Leader ist. Kann NPCs ansprechen (A), Truhen öffnen und handeln.",
@@ -209,7 +215,7 @@ namespace FF9Coop.Ui
                 () => new[] { "An", "Aus" }, () => cfg.WorldCompanionEnabled ? 0 : 1, v => cfg.WorldCompanionEnabled = v == 0);
             List<CharacterId> companions = new List<CharacterId> { CharacterId.NONE };
             foreach (PLAYER p in members)
-                if (p != null && p.Index <= CharacterId.Amarant)
+                if (p != null && Game.Companion.TryGetModelCode(p.Index, out _))
                     companions.Add(p.Index);
             if (cfg.CompanionCharacter != CharacterId.NONE && !companions.Contains(cfg.CompanionCharacter))
                 companions.Add(cfg.CompanionCharacter);

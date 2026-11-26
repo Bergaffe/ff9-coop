@@ -24,14 +24,42 @@ namespace FF9Coop.Game
     /// </summary>
     internal static class Companion
     {
+        /// <summary>
+        /// Feldmodell je Charakter. Hauptcharaktere: GEO_MAIN_F0_*, Gast-/Zusatzcharaktere (Blank, Beatrix,
+        /// z. B. spielbar durch AlternateFantasy) GEO_SUB_F0_*. Über [CompanionModels] in der INI erweiterbar,
+        /// etwa für Charaktere aus anderen Mods. Animationen heißen gleich mit "ANH" statt "GEO".
+        /// </summary>
         private static readonly Dictionary<CharacterId, String> s_modelCode = new Dictionary<CharacterId, String>
         {
-            { CharacterId.Zidane, "ZDN" }, { CharacterId.Vivi, "VIV" }, { CharacterId.Garnet, "GRN" }, { CharacterId.Steiner, "STN" },
-            { CharacterId.Freya, "FRJ" }, { CharacterId.Quina, "KUI" }, { CharacterId.Eiko, "EIK" }, { CharacterId.Amarant, "SLM" },
+            { CharacterId.Zidane, "GEO_MAIN_F0_ZDN" }, { CharacterId.Vivi, "GEO_MAIN_F0_VIV" }, { CharacterId.Garnet, "GEO_MAIN_F0_GRN" },
+            { CharacterId.Steiner, "GEO_MAIN_F0_STN" }, { CharacterId.Freya, "GEO_MAIN_F0_FRJ" }, { CharacterId.Quina, "GEO_MAIN_F0_KUI" },
+            { CharacterId.Eiko, "GEO_MAIN_F0_EIK" }, { CharacterId.Amarant, "GEO_MAIN_F0_SLM" },
+            { CharacterId.Cinna, "GEO_SUB_F0_CNA" }, { CharacterId.Marcus, "GEO_SUB_F0_MRC" }, { CharacterId.Blank, "GEO_SUB_F0_BLN" },
+            { CharacterId.Beatrix, "GEO_SUB_F0_BTX" },
         };
+        private static readonly HashSet<String> s_knownModels = new HashSet<String>(s_modelCode.Values);
 
-        /// <summary>Modell-Kürzel (z. B. "VIV") eines spielbaren Hauptcharakters.</summary>
+        /// <summary>Feldmodell (z. B. "GEO_MAIN_F0_VIV") eines spielbaren Charakters.</summary>
         internal static Boolean TryGetModelCode(CharacterId id, out String code) => s_modelCode.TryGetValue(id, out code);
+
+        /// <summary>Überschreibt/ergänzt Modelle aus der INI ([CompanionModels] Beatrix = GEO_SUB_F0_BTX).</summary>
+        internal static void SetModel(CharacterId id, String geo)
+        {
+            s_modelCode[id] = geo;
+            s_knownModels.Add(geo);
+        }
+
+        /// <summary>"GEO_MAIN_F0_VIV" + "WALK" → "ANH_MAIN_F0_VIV_WALK".</summary>
+        internal static String AnimName(String geo, String suffix) => "ANH" + geo.Substring(3) + "_" + suffix;
+
+        /// <summary>Anzeigename für das HUD (Spielername des Charakters).</summary>
+        internal static String DisplayName(String geo)
+        {
+            foreach (KeyValuePair<CharacterId, String> kv in s_modelCode)
+                if (kv.Value == geo)
+                    return Ui.CoopMenu.CharacterName(kv.Key);
+            return geo;
+        }
 
         private const Single MaxStepHeight = 250f;    // maximaler Höhenunterschied pro Schritt (verhindert Etagen-Sprünge)
         private const Single SpawnBehind = 120f;      // Abstand hinter dem Leader beim (Wieder-)Erscheinen
@@ -175,9 +203,8 @@ namespace FF9Coop.Game
             if (obj == null || obj.model == UInt16.MaxValue)
                 return null;
             String geo = FF9BattleDB.GEO.GetValue(obj.model); // z. B. "GEO_MAIN_F0_ZDN"
-            if (String.IsNullOrEmpty(geo) || !geo.StartsWith("GEO_MAIN_F0_"))
-                return null;
-            return geo.Substring("GEO_MAIN_F0_".Length);
+            // Nur Modelle spielbarer Charaktere zählen (keine NPCs wie GEO_SUB_F0_BRN, keine Moogles)
+            return !String.IsNullOrEmpty(geo) && s_knownModels.Contains(geo) ? geo : null;
         }
 
         /// <summary>Hauptcharakter-Modelle, die gerade sichtbar als Event-Objekt in der Szene stehen.</summary>
@@ -214,8 +241,8 @@ namespace FF9Coop.Game
         private static void Spawn(FieldMap map, String code)
         {
             Destroy();
-            String geo = "GEO_MAIN_F0_" + code;
-            GameObject go = ModelFactory.CreateModel($"Models/main/{geo}/{geo}", false, true, Configuration.Graphics.ElementsSmoothTexture);
+            String geo = code; // vollständiger Modellname, z. B. GEO_MAIN_F0_VIV oder GEO_SUB_F0_BTX
+            GameObject go = ModelFactory.CreateModel(geo, false, true, Configuration.Graphics.ElementsSmoothTexture);
             if (go == null)
             {
                 CoopLog.Warning($"Begleiter-Modell {geo} nicht gefunden");
@@ -226,7 +253,7 @@ namespace FF9Coop.Game
 
             s_anim = go.GetComponent<Animation>() ?? go.AddComponent<Animation>();
             foreach (String suffix in new[] { "IDLE", "WALK", "RUN" })
-                AnimationFactory.AddAnimWithAnimatioName(go, $"ANH_MAIN_F0_{code}_{suffix}");
+                AnimationFactory.AddAnimWithAnimatioName(go, Companion.AnimName(code, suffix));
             foreach (AnimationState state in s_anim)
                 state.wrapMode = WrapMode.Loop;
 
@@ -354,7 +381,9 @@ namespace FF9Coop.Game
 
             Vector3 step = dir * speed * Time.deltaTime;
             Vector3 next = s_pos + step;
-            // Auf dem Laufgitter bleiben; an Kanten entlanggleiten (erst ganzer Schritt, dann nur X, dann nur Z)
+            CollectBlockers(map);
+            // Auf dem Laufgitter bleiben und nicht durch NPCs laufen; an Kanten/NPCs entlanggleiten
+            // (erst ganzer Schritt, dann nur X, dann nur Z)
             if (!TryStep(map.walkMesh, next, ref s_pos)
                 && !TryStep(map.walkMesh, new Vector3(next.x, s_pos.y, s_pos.z), ref s_pos)
                 && !TryStep(map.walkMesh, new Vector3(s_pos.x, s_pos.y, next.z), ref s_pos))
@@ -368,8 +397,88 @@ namespace FF9Coop.Game
             ApplyTransform();
         }
 
+        // ---------------- Kollision mit NPCs ----------------
+
+        private struct Blocker
+        {
+            public Single X, Y, Z, Radius;
+        }
+
+        private static readonly List<Blocker> s_blockers = new List<Blocker>();
+        private static Single s_selfRadius;
+
+        /// <summary>
+        /// Sammelt einmal pro Bewegungsschritt alle NPCs, mit denen der Begleiter kollidiert. Regeln wie
+        /// WalkMesh.Collision (Modus 0, also Körper): sichtbare Event-Figuren (cid 4), Radius = 4 · collRad,
+        /// Kollisions-Flags wie beim Spieler. Der Leader selbst blockiert nicht, sonst könnte er den
+        /// Begleiter (den das Spiel nicht kennt) in Engstellen einsperren.
+        /// </summary>
+        private static void CollectBlockers(FieldMap map)
+        {
+            s_blockers.Clear();
+            EventEngine events = PersistenSingleton<EventEngine>.Instance;
+            Actor leader = map.playerController.originalActor;
+            s_selfRadius = 4f * Math.Max((Byte)8, leader.collRad);
+            Boolean leaderIgnoresNpc = (leader.flags & 4) != 0;
+
+            for (ObjList list = events.GetActiveObjList(); list != null; list = list.next)
+            {
+                Obj obj = list.obj;
+                if (obj == null || obj.cid != 4 || obj == leader)
+                    continue;
+                Actor npc = (Actor)obj;
+                if (npc.collRad == 0 || npc.pos == null || !IsShownCached(npc))
+                    continue;
+                // Wie im Spiel: keine Kollision, wenn beide Seiten sie per Flag abgeschaltet haben
+                if (leaderIgnoresNpc && (npc.flags & 2) != 0)
+                    continue;
+                s_blockers.Add(new Blocker { X = npc.pos[0], Y = npc.pos[1], Z = npc.pos[2], Radius = 4f * npc.collRad });
+            }
+        }
+
+        private static readonly Dictionary<Obj, KeyValuePair<Boolean, Single>> s_shownCache = new Dictionary<Obj, KeyValuePair<Boolean, Single>>();
+
+        /// <summary>Sichtbarkeit (alle Renderer durchsuchen) nur alle 0,5 s pro NPC neu prüfen, vermeidet Garbage pro Frame.</summary>
+        private static Boolean IsShownCached(Actor npc)
+        {
+            Single now = Time.realtimeSinceStartup;
+            if (s_shownCache.TryGetValue(npc, out KeyValuePair<Boolean, Single> entry) && now < entry.Value)
+                return entry.Key;
+            Boolean shown = IsShown(npc.go);
+            if (s_shownCache.Count > 256)
+                s_shownCache.Clear(); // Objekte vergangener Karten nicht ewig festhalten
+            s_shownCache[npc] = new KeyValuePair<Boolean, Single>(shown, now + 0.5f);
+            return shown;
+        }
+
+        /// <summary>
+        /// True, wenn der Schritt in einen NPC hineinführt. Steckt der Begleiter schon in einem
+        /// (der NPC ist in ihn hineingelaufen), darf er sich herausbewegen, aber nicht tiefer hinein.
+        /// </summary>
+        private static Boolean BlockedByNpc(Vector3 from, Vector3 to)
+        {
+            for (Int32 i = 0; i < s_blockers.Count; i++)
+            {
+                Blocker b = s_blockers[i];
+                if (Math.Abs(b.Y - to.y) > 400f) // andere Etage (wie im Spiel: ±400)
+                    continue;
+                Single r = b.Radius + s_selfRadius;
+                Single dxTo = to.x - b.X, dzTo = to.z - b.Z;
+                Single distTo = dxTo * dxTo + dzTo * dzTo;
+                if (distTo >= r * r)
+                    continue;
+                Single dxFrom = from.x - b.X, dzFrom = from.z - b.Z;
+                Single distFrom = dxFrom * dxFrom + dzFrom * dzFrom;
+                if (distTo < distFrom)
+                    return true;
+            }
+            return false;
+        }
+
         private static Boolean TryStep(WalkMesh mesh, Vector3 target, ref Vector3 pos)
         {
+            if (BlockedByNpc(pos, target))
+                return false;
             if (!TryGetHeight(mesh, target, pos.y, out Single h))
                 return false;
             pos = new Vector3(target.x, h, target.z);
@@ -433,7 +542,7 @@ namespace FF9Coop.Game
         {
             if (s_anim == null)
                 return;
-            String clip = $"ANH_MAIN_F0_{s_code}_{suffix}";
+            String clip = Companion.AnimName(s_code, suffix);
             if (clip == s_currentClip && s_anim.isPlaying)
                 return;
             if (s_anim.GetClip(clip) == null)
