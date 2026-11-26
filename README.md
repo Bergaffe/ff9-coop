@@ -10,6 +10,8 @@ Koop-Multiplayer-Mod für **Final Fantasy IX (Steam)** auf Basis von [Memoria](h
 |---|---|---|
 | Zug anfordern (Kampf, eigener Charakter ist bereit) | **Y** / Dreieck | **T** |
 | Leader übernehmen (Feld/Weltkarte ohne Cutscene, nur der Nicht-Leader) | **Back/Select 1 s halten** | **L 1 s halten** |
+| Begleiter: NPC ansprechen, Truhe/Schild/Auslöser benutzen, Shop | **A** | Bestätigen-Taste des Spiels |
+| Begleiter: Tetra Master herausfordern | **X** (Quadrat) | Spezial-Taste des Spiels |
 | Koop-Menü öffnen/schließen (alle Zuweisungen; das Spiel pausiert) | **L3 + R3** (beide Sticks drücken) | **K** |
 
 Im Koop-Menü stellst du ein:

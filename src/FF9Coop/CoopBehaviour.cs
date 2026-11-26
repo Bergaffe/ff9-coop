@@ -35,6 +35,8 @@ namespace FF9Coop
                 BattleTurnRequest.Update();
                 LeaderControl.Update();
                 Companion.Update(); // fängt eigene Fehler ab und schaltet sich nach 3 Fehlern ab
+                InteractionOwner.Update();
+                CompanionInteraction.Update();
             }
             catch (Exception ex)
             {

@@ -43,6 +43,12 @@ namespace FF9Coop.Game
                 }
 
                 case UIManager.UIState.FieldHUD:
+                    // Hat der Begleiter-Spieler ein Gespräch begonnen, bedient er Dialog und Auswahl
+                    if (InteractionOwner.Player != 0)
+                    {
+                        Description = $"Gespräch · P{InteractionOwner.Player}";
+                        return Mask(InteractionOwner.Player);
+                    }
                     Description = $"Feld · Leader P{cfg.LeaderPlayer}"
                                   + (Companion.IsVisible ? $" · Begleiter {Companion.CharacterCode} P{Companion.CompanionPlayer(cfg)}" : "");
                     return Mask(cfg.LeaderPlayer);
@@ -52,7 +58,7 @@ namespace FF9Coop.Game
                 case UIManager.UIState.QuadMist:
                 case UIManager.UIState.QuadMistBattle:
                     Description = "Tetra Master";
-                    return Mask(cfg.LeaderPlayer);
+                    return Mask(InteractionOwner.Player != 0 ? InteractionOwner.Player : cfg.LeaderPlayer);
 
                 case UIManager.UIState.MainMenu:
                 case UIManager.UIState.Item:
@@ -65,8 +71,11 @@ namespace FF9Coop.Game
                 case UIManager.UIState.NameSetting:
                 case UIManager.UIState.PartySetting:
                 case UIManager.UIState.Chocograph:
-                    Description = "Menü";
-                    return cfg.MenuControl == MenuControlMode.Leader ? Mask(cfg.LeaderPlayer) : AllPlayers;
+                    Description = InteractionOwner.Player != 0 ? $"Menü · P{InteractionOwner.Player}" : "Menü";
+                    // Shop o. Ä. vom Begleiter-Spieler geöffnet → er darf auch bei MenuControl = Leader
+                    if (cfg.MenuControl == MenuControlMode.Leader)
+                        return Mask(cfg.LeaderPlayer) | (InteractionOwner.Player != 0 ? Mask(InteractionOwner.Player) : 0);
+                    return AllPlayers;
 
                 default:
                     // Titel, Laden/Speichern, Pause, Kampfergebnis, Game Over, …: jeder darf.

@@ -48,6 +48,11 @@ namespace FF9Coop.Game
 
         public static Boolean IsVisible => s_go != null && s_go.activeSelf;
         public static String CharacterCode => s_code;
+        /// <summary>Position im Koordinatenraum der Feldkarte (wie FieldMapActorController.curPos).</summary>
+        public static Vector3 LocalPosition => s_pos;
+        public static Vector3 WorldPosition => s_go != null ? s_go.transform.position : Vector3.zero;
+        /// <summary>Blickrichtung in Grad, gleiche Konvention wie Actor.rotAngle[1].</summary>
+        public static Single Yaw => s_yaw;
 
         public static void Update()
         {
