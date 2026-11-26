@@ -45,7 +45,12 @@ namespace FF9Coop
         public Single CompanionLeash = 2000f;
         public KeyCode CompanionRunKey = KeyCode.LeftShift;
         /// <summary>"Wer spielt …?"-Fenster, wenn das Spiel die gesteuerte Figur wechselt.</summary>
-        public Boolean SoloScenePrompt = true;
+        public Int32 SoloSceneMode = SoloAsk;
+
+        /// <summary>Solo-Abschnitte: Fenster "Wer spielt …?" zeigen.</summary>
+        public const Int32 SoloAsk = -1;
+        /// <summary>Solo-Abschnitte: der aktuelle Leader spielt weiter, ohne Nachfrage. Werte 1–4 = fester Spieler.</summary>
+        public const Int32 SoloKeepLeader = 0;
         /// <summary>Begleiter auch auf der Weltkarte (nur zu Fuß).</summary>
         public Boolean WorldCompanionEnabled = true;
         /// <summary>Leine auf der Weltkarte in Welt-Einheiten (ein Gelände-Block = 64).</summary>
@@ -97,7 +102,7 @@ namespace FF9Coop
             cfg.CompanionRunKey = GetKey(ini, "Companion", "RunKey", cfg.CompanionRunKey);
             cfg.MenuKey = GetKey(ini, "Control", "MenuKey", cfg.MenuKey);
             cfg.WorldCompanionEnabled = GetBool(ini, "Companion", "WorldMap", cfg.WorldCompanionEnabled);
-            cfg.SoloScenePrompt = GetBool(ini, "Control", "SoloScenePrompt", cfg.SoloScenePrompt);
+            cfg.SoloSceneMode = ParseSoloMode(GetString(ini, "Control", "SoloScenePrompt", null), cfg.PlayerCount);
             if (Single.TryParse(GetString(ini, "Companion", "WorldLeash", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single wleash))
                 cfg.WorldLeash = Math.Max(2f, wleash);
 
@@ -153,7 +158,8 @@ namespace FF9Coop
                 Set(lines, "Players", "Pad" + (i + 1), PadPlayer[i].ToString());
             Set(lines, "Control", "MenuControl", MenuControl.ToString());
             Set(lines, "Control", "BattleTurnRequest", BattleTurnRequest ? "1" : "0");
-            Set(lines, "Control", "SoloScenePrompt", SoloScenePrompt ? "1" : "0");
+            Set(lines, "Control", "SoloScenePrompt",
+                SoloSceneMode == SoloAsk ? "Ask" : SoloSceneMode == SoloKeepLeader ? "Keep" : "P" + SoloSceneMode);
             Set(lines, "Companion", "Enabled", CompanionEnabled ? "1" : "0");
             Set(lines, "Companion", "Character", CompanionCharacter == CharacterId.NONE ? "Auto" : CompanionCharacter.ToString());
             Set(lines, "Companion", "WorldMap", WorldCompanionEnabled ? "1" : "0");
@@ -256,6 +262,19 @@ namespace FF9Coop
             String v = GetString(ini, sec, key, null);
             if (v == null) return def;
             return v == "1" || v.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>"Ask"/"1" = fragen, "Keep"/"0" = Leader bleibt, "P1".."P4" = fester Spieler.</summary>
+        private static Int32 ParseSoloMode(String v, Int32 playerCount)
+        {
+            if (String.IsNullOrEmpty(v) || v == "1" || v.Equals("Ask", StringComparison.OrdinalIgnoreCase))
+                return SoloAsk;
+            if (v == "0" || v.Equals("Keep", StringComparison.OrdinalIgnoreCase))
+                return SoloKeepLeader;
+            if (v.Length == 2 && (v[0] == 'P' || v[0] == 'p') && Int32.TryParse(v.Substring(1), out Int32 p) && p >= 1 && p <= playerCount)
+                return p;
+            CoopLog.Warning($"[Control] SoloScenePrompt: unbekannter Wert '{v}', nutze Ask");
+            return SoloAsk;
         }
 
         private static KeyCode GetKey(Dictionary<String, Dictionary<String, String>> ini, String sec, String key, KeyCode def)

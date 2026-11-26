@@ -61,9 +61,24 @@ namespace FF9Coop.Ui
 
             s_lastCode = code;
             s_lastMap = map;
-            if (!cfg.SoloScenePrompt || cfg.PlayerCount < 2)
+            if (cfg.PlayerCount < 2 || cfg.SoloSceneMode == CoopConfig.SoloKeepLeader)
                 return;
-            Open(code);
+            if (cfg.SoloSceneMode == CoopConfig.SoloAsk)
+            {
+                Open(code);
+                return;
+            }
+
+            // Fester Spieler aus dem Koop-Menü: ohne Fenster übernehmen
+            s_name = NameForCode(code);
+            Int32 fixedPlayer = Math.Min(cfg.SoloSceneMode, cfg.PlayerCount);
+            if (fixedPlayer != cfg.LeaderPlayer)
+            {
+                cfg.LeaderPlayer = fixedPlayer;
+                InputRouter.ForceRelease();
+                CoopLog.Message($"Solo-Abschnitt: P{fixedPlayer} spielt {s_name} (feste Einstellung)");
+            }
+            CoopBehaviour.Notify($"P{cfg.LeaderPlayer} spielt {s_name}");
         }
 
         private static void Open(String code)

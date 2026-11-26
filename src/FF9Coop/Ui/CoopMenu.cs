@@ -149,8 +149,19 @@ namespace FF9Coop.Ui
             Add("Menüs", "Wer das Hauptmenü, Shops und Ähnliches bedienen darf.",
                 () => new[] { "Alle", "Leader" }, () => cfg.MenuControl == MenuControlMode.Leader ? 1 : 0,
                 v => cfg.MenuControl = v == 1 ? MenuControlMode.Leader : MenuControlMode.Anyone);
-            Add("Solo-Abschnitte", "Wechselt das Spiel die gesteuerte Figur (z. B. Vivi allein in Alexandria), fragt ein Fenster: „Wer spielt …?“ Wer zuerst A drückt, übernimmt.",
-                () => new[] { "Fragen", "Nicht fragen" }, () => cfg.SoloScenePrompt ? 0 : 1, v => cfg.SoloScenePrompt = v == 0);
+            Add("Solo-Abschnitte", "Wer spielt, wenn das Spiel nur eine Figur steuern lässt (z. B. Vivi allein in Alexandria). „Fragen“: Fenster, wer zuerst A drückt, übernimmt. „Leader bleibt“: ohne Nachfrage weiter. P1/P2…: dieser Spieler übernimmt immer.",
+                () =>
+                {
+                    String[] po = PlayerOptions();
+                    String[] o = new String[po.Length + 2];
+                    o[0] = "Fragen";
+                    o[1] = "Leader bleibt";
+                    Array.Copy(po, 0, o, 2, po.Length);
+                    return o;
+                },
+                // Optionsindex: 0 = Fragen (-1), 1 = Leader bleibt (0), 2.. = P1..
+                () => cfg.SoloSceneMode == CoopConfig.SoloAsk ? 0 : cfg.SoloSceneMode + 1,
+                v => cfg.SoloSceneMode = v == 0 ? CoopConfig.SoloAsk : v - 1);
 
             Header("Eingabegeräte");
             Add("Tastatur", "Welcher Spieler die Tastatur benutzt.",
@@ -218,6 +229,8 @@ namespace FF9Coop.Ui
             cfg.PlayerCount = n;
             cfg.LeaderPlayer = Math.Min(cfg.LeaderPlayer, n);
             cfg.KeyboardPlayer = Math.Min(cfg.KeyboardPlayer, n);
+            if (cfg.SoloSceneMode > n)
+                cfg.SoloSceneMode = CoopConfig.SoloAsk;
             for (Int32 i = 0; i < CoopConfig.MaxPads; i++)
                 cfg.PadPlayer[i] = Math.Min(cfg.PadPlayer[i], n);
             foreach (CharacterId id in new List<CharacterId>(cfg.Owners.Keys))
