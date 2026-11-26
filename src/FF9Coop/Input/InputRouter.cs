@@ -43,7 +43,7 @@ namespace FF9Coop.Input
             CoopConfig cfg = CoopMod.Config;
 
             // Koop-Menü offen: Das Spiel bekommt gar nichts (das Menü liest die Geräte selbst roh)
-            if (Ui.CoopMenu.IsOpen)
+            if (Ui.CoopMenu.IsOpen || Ui.SoloScenePrompt.IsOpen)
             {
                 KeyboardAllowed = false;
                 s_effectivePad = -1;
@@ -113,6 +113,9 @@ namespace FF9Coop.Input
                 HasEffective = true;
             }
         }
+
+        /// <summary>XInput-Slot, dessen Eingaben das Spiel gerade sieht (-1 = keiner/Tastatur).</summary>
+        public static Int32 EffectivePad => s_effectivePad;
 
         /// <summary>Beim nächsten Tick neu wählen und gehaltene Tasten erst nach dem Loslassen durchlassen.</summary>
         public static void ForceRelease()

@@ -30,6 +30,9 @@ namespace FF9Coop.Game
             { CharacterId.Freya, "FRJ" }, { CharacterId.Quina, "KUI" }, { CharacterId.Eiko, "EIK" }, { CharacterId.Amarant, "SLM" },
         };
 
+        /// <summary>Modell-Kürzel (z. B. "VIV") eines spielbaren Hauptcharakters.</summary>
+        internal static Boolean TryGetModelCode(CharacterId id, out String code) => s_modelCode.TryGetValue(id, out code);
+
         private const Single MaxStepHeight = 250f;    // maximaler Höhenunterschied pro Schritt (verhindert Etagen-Sprünge)
         private const Single SpawnBehind = 120f;      // Abstand hinter dem Leader beim (Wieder-)Erscheinen
 
@@ -167,7 +170,7 @@ namespace FF9Coop.Game
             return false;
         }
 
-        private static String ModelCodeOf(PosObj obj)
+        internal static String ModelCodeOf(PosObj obj)
         {
             if (obj == null || obj.model == UInt16.MaxValue)
                 return null;
@@ -255,7 +258,7 @@ namespace FF9Coop.Game
         /// deshalb passen Unitys Bounds nicht zur Bildposition. Ohne riesige Bounds blendet das
         /// Frustum-Culling Modellteile (z. B. den Kopf) oder die ganze Figur fälschlich aus.
         /// </summary>
-        private static void ForceNonCulling(FieldMap map, GameObject go)
+        internal static void ForceNonCulling(FieldMap map, GameObject go)
         {
             Vector3 center = Vector3.zero;
             Camera cam = map.GetMainCamera();
@@ -453,7 +456,7 @@ namespace FF9Coop.Game
         /// <summary>
         /// Rohe Eingabe des Begleiter-Spielers. Das Spiel sieht sie im Feld nicht, denn dort ist nur der Leader berechtigt.
         /// </summary>
-        private static Vector2 ReadMovement(CoopConfig cfg, Int32 player, out Boolean run)
+        internal static Vector2 ReadMovement(CoopConfig cfg, Int32 player, out Boolean run)
         {
             Vector2 move = Vector2.zero;
             run = false;

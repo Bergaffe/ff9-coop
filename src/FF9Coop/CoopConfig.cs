@@ -44,6 +44,12 @@ namespace FF9Coop
         /// <summary>Maximaler Abstand zum Leader, danach wird der Begleiter zurückgeholt (Feld-Einheiten).</summary>
         public Single CompanionLeash = 2000f;
         public KeyCode CompanionRunKey = KeyCode.LeftShift;
+        /// <summary>"Wer spielt …?"-Fenster, wenn das Spiel die gesteuerte Figur wechselt.</summary>
+        public Boolean SoloScenePrompt = true;
+        /// <summary>Begleiter auch auf der Weltkarte (nur zu Fuß).</summary>
+        public Boolean WorldCompanionEnabled = true;
+        /// <summary>Leine auf der Weltkarte in Welt-Einheiten (ein Gelände-Block = 64).</summary>
+        public Single WorldLeash = 12f;
 
         /// <summary>Öffnet das Koop-Menü (Controller: L3+R3).</summary>
         public KeyCode MenuKey = KeyCode.K;
@@ -90,6 +96,10 @@ namespace FF9Coop
                 cfg.CompanionLeash = Math.Max(200f, leash);
             cfg.CompanionRunKey = GetKey(ini, "Companion", "RunKey", cfg.CompanionRunKey);
             cfg.MenuKey = GetKey(ini, "Control", "MenuKey", cfg.MenuKey);
+            cfg.WorldCompanionEnabled = GetBool(ini, "Companion", "WorldMap", cfg.WorldCompanionEnabled);
+            cfg.SoloScenePrompt = GetBool(ini, "Control", "SoloScenePrompt", cfg.SoloScenePrompt);
+            if (Single.TryParse(GetString(ini, "Companion", "WorldLeash", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single wleash))
+                cfg.WorldLeash = Math.Max(2f, wleash);
 
             if (ini.TryGetValue("owners", out Dictionary<String, String> owners))
             {
@@ -143,8 +153,10 @@ namespace FF9Coop
                 Set(lines, "Players", "Pad" + (i + 1), PadPlayer[i].ToString());
             Set(lines, "Control", "MenuControl", MenuControl.ToString());
             Set(lines, "Control", "BattleTurnRequest", BattleTurnRequest ? "1" : "0");
+            Set(lines, "Control", "SoloScenePrompt", SoloScenePrompt ? "1" : "0");
             Set(lines, "Companion", "Enabled", CompanionEnabled ? "1" : "0");
             Set(lines, "Companion", "Character", CompanionCharacter == CharacterId.NONE ? "Auto" : CompanionCharacter.ToString());
+            Set(lines, "Companion", "WorldMap", WorldCompanionEnabled ? "1" : "0");
             foreach (CharacterId id in Enum.GetValues(typeof(CharacterId)))
             {
                 if (id == CharacterId.NONE)

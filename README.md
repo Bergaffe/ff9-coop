@@ -24,11 +24,15 @@ Im Koop-Menü stellst du ein:
 
 Tasten und Haltedauer lassen sich in `FF9Coop.ini` ändern (`TurnRequestKey`, `LeaderKey`, `LeaderHoldSeconds`).
 
-## Stand: v0.2.0
-Neu in Phase 2 (in Arbeit):
-- „Zug anfordern“ geht jetzt auch mit der Tastatur.
-- Der Leader lässt sich im Spiel wechseln.
-- Das HUD zeigt Einblendungen und beim Halten einen Fortschrittsbalken.
+## Stand: v0.6.0
+- **v0.6.0:**
+  - Begleiter auf der Weltkarte (nur zu Fuß)
+  - „Wer spielt …?“-Fenster in Solo-Abschnitten
+  - Vibration geht an den Controller des aktiven Spielers
+- **v0.5.0:** Der Begleiter spricht NPCs an, öffnet Truhen, handelt und spielt Tetra Master. Wer ein Gespräch beginnt, bedient es auch.
+- **v0.4.0:** Koop-Menü im FF9-Stil (K / L3+R3)
+- **v0.3.0:** Sichtbare Begleiter-Figur im Feld
+- **v0.2.0:** Leader-Wechsel, „Zug anfordern“ per Tastatur, HUD-Einblendungen
 
 ### Phase 1 (v0.1.0)
 - Mehrere XInput-Controller werden getrennt ausgewertet. Das Spiel sieht immer nur die Eingaben der Spieler, die gerade dran sind.

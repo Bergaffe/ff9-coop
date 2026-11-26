@@ -53,7 +53,8 @@ namespace FF9Coop.Game
                                   + (Companion.IsVisible ? $" · Begleiter {Companion.CharacterCode} P{Companion.CompanionPlayer(cfg)}" : "");
                     return Mask(cfg.LeaderPlayer);
                 case UIManager.UIState.WorldHUD:
-                    Description = $"Weltkarte · Leader P{cfg.LeaderPlayer}";
+                    Description = $"Weltkarte · Leader P{cfg.LeaderPlayer}"
+                                  + (WorldCompanion.IsVisible ? $" · Begleiter {WorldCompanion.CharacterCode} P{Companion.CompanionPlayer(cfg)}" : "");
                     return Mask(cfg.LeaderPlayer);
                 case UIManager.UIState.QuadMist:
                 case UIManager.UIState.QuadMistBattle:

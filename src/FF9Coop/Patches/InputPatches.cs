@@ -49,6 +49,25 @@ namespace FF9Coop.Patches
             {
                 CoopLog.Warning("UnityXInput.Input.GetXAxis nicht gefunden – Achsen-Filter inaktiv");
             }
+
+            // 5) Vibration an das Pad des Spielers, der gerade dran ist (sonst immer Pad 1)
+            Patch(harmony, AccessTools.Method(typeof(UnityXInput.XInputManager), "SetVibration", new[] { typeof(Single), typeof(Single) }),
+                nameof(SetVibration_Prefix));
+        }
+
+        private static Int32 s_lastVibPad = -1;
+
+        private static Boolean SetVibration_Prefix(Single leftMotor, Single rightMotor)
+        {
+            Int32 pad = InputRouter.EffectivePad;
+            if (!CoopMod.Config.Enabled || pad < 0 || !PadInput.IsConnected(pad))
+                return true;
+            // Wechselt das Pad, das alte Pad nicht weiter vibrieren lassen
+            if (s_lastVibPad >= 0 && s_lastVibPad != pad)
+                XInputDotNetPure.GamePad.SetVibration((PlayerIndex)s_lastVibPad, 0f, 0f);
+            XInputDotNetPure.GamePad.SetVibration((PlayerIndex)pad, leftMotor, rightMotor);
+            s_lastVibPad = pad;
+            return false;
         }
 
         private static void Patch(HarmonyInstance harmony, MethodBase original, String prefixName)

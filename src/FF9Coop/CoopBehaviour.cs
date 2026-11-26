@@ -29,12 +29,18 @@ namespace FF9Coop
         {
             try
             {
-                Ui.CoopMenu.Update();
+                // Modale Fenster: immer nur eins gleichzeitig (beide pausieren das Spiel über timeScale)
+                if (!Ui.SoloScenePrompt.IsOpen)
+                    Ui.CoopMenu.Update();
                 if (Ui.CoopMenu.IsOpen)
                     return; // Spiel ist pausiert, die Koop-Logik ruht
+                Ui.SoloScenePrompt.Update();
+                if (Ui.SoloScenePrompt.IsOpen)
+                    return;
                 BattleTurnRequest.Update();
                 LeaderControl.Update();
                 Companion.Update(); // fängt eigene Fehler ab und schaltet sich nach 3 Fehlern ab
+                WorldCompanion.Update(); // dito, eigene 3D-Engine der Weltkarte
                 InteractionOwner.Update();
                 CompanionInteraction.Update();
             }
@@ -50,11 +56,11 @@ namespace FF9Coop
 
         private void OnGUI()
         {
-            if (Ui.CoopMenu.IsOpen)
+            if (Ui.CoopMenu.IsOpen || Ui.SoloScenePrompt.IsOpen)
             {
-                // Menü über allem anderen zeichnen
+                // Modale Fenster über allem anderen zeichnen
                 GUI.depth = -1000;
-                try { Ui.CoopMenu.Draw(); }
+                try { Ui.CoopMenu.Draw(); Ui.SoloScenePrompt.Draw(); }
                 catch (Exception ex)
                 {
                     if (!_guiErrorLogged)

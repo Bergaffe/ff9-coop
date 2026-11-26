@@ -51,11 +51,12 @@ Stand: 2026-11-26 · Grundlage: [phase0-spike.md](phase0-spike.md)
 ## Phasen (überarbeitet)
 | Phase | Inhalt |
 |---|---|
-| 1 | Mod-Gerüst (Memoria-Mod-DLL + Harmony), Multi-Pad-Input-Layer, Kampf-Besitz & Menü-Routing |
-| 2 | Feld: Leader-Wechsel, Solo-Szenen-Popup, Menü-/Dialog-Rechte |
-| 3 | Feld: Begleiter-Figur (Spawn, Bewegung, Leine, Ausblenden, Interaktion) |
+| 1 ✅ | Mod-Gerüst (Memoria-Mod-DLL + Harmony), Multi-Pad-Input-Layer, Kampf-Besitz & Menü-Routing |
+| 2 ✅ | Feld: Leader-Wechsel, Solo-Szenen-Popup, Menü-/Dialog-Rechte |
+| 3 ✅ | Feld: Begleiter-Figur (Spawn, Bewegung, Leine, Ausblenden, Interaktion mit NPCs/Truhen/Shops) |
 | 4 | Online-Tests via Remote Play Together/Parsec, Latenz, Wait-Option |
-| 5 | Weltkarte: Steuerungsübergabe → später Begleiter mit Leine |
+| 5 ✅ | Weltkarte: Begleiter mit Leine (zu Fuß) – Fahrzeuge steuert der Leader |
+| ✅ | Koop-Menü im FF9-Stil für alle Zuweisungen (K / L3+R3) |
 | 6 | Polish: Rollen-Overlay, Persistenz, Installer, Minispiel-Regeln, Coop-Profil (Export/Import von Mod-Liste + Settings für Host-Wechsel, mit Abgleich/Warnung) |
 
 ## Mods im Multiplayer

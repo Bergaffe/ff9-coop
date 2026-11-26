@@ -149,6 +149,8 @@ namespace FF9Coop.Ui
             Add("Menüs", "Wer das Hauptmenü, Shops und Ähnliches bedienen darf.",
                 () => new[] { "Alle", "Leader" }, () => cfg.MenuControl == MenuControlMode.Leader ? 1 : 0,
                 v => cfg.MenuControl = v == 1 ? MenuControlMode.Leader : MenuControlMode.Anyone);
+            Add("Solo-Abschnitte", "Wechselt das Spiel die gesteuerte Figur (z. B. Vivi allein in Alexandria), fragt ein Fenster: „Wer spielt …?“ Wer zuerst A drückt, übernimmt.",
+                () => new[] { "Fragen", "Nicht fragen" }, () => cfg.SoloScenePrompt ? 0 : 1, v => cfg.SoloScenePrompt = v == 0);
 
             Header("Eingabegeräte");
             Add("Tastatur", "Welcher Spieler die Tastatur benutzt.",
@@ -189,9 +191,11 @@ namespace FF9Coop.Ui
             Add("Zug anfordern", "Ist ein eigener Charakter bereit, holt ihn der wartende Spieler mit Y bzw. T.",
                 () => new[] { "An", "Aus" }, () => cfg.BattleTurnRequest ? 0 : 1, v => cfg.BattleTurnRequest = v == 0);
 
-            Header("Begleiter in Städten");
-            Add("Begleiter", "Zweite sichtbare Figur im Feld, gesteuert vom Spieler, der nicht Leader ist. (Weltkarte folgt.)",
+            Header("Begleiter");
+            Add("Begleiter", "Zweite sichtbare Figur, gesteuert vom Spieler, der nicht Leader ist. Kann NPCs ansprechen (A), Truhen öffnen und handeln.",
                 () => new[] { "An", "Aus" }, () => cfg.CompanionEnabled ? 0 : 1, v => cfg.CompanionEnabled = v == 0);
+            Add("Auf der Weltkarte", "Begleiter auch auf der Weltkarte zeigen (nur zu Fuß, nicht auf Chocobo oder Luftschiff).",
+                () => new[] { "An", "Aus" }, () => cfg.WorldCompanionEnabled ? 0 : 1, v => cfg.WorldCompanionEnabled = v == 0);
             List<CharacterId> companions = new List<CharacterId> { CharacterId.NONE };
             foreach (PLAYER p in members)
                 if (p != null && p.Index <= CharacterId.Amarant)
@@ -221,7 +225,7 @@ namespace FF9Coop.Ui
                     cfg.Owners.Remove(id);
         }
 
-        private static String CharacterName(CharacterId id)
+        internal static String CharacterName(CharacterId id)
         {
             try
             {
