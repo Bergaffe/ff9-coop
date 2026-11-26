@@ -74,7 +74,7 @@ namespace FF9Coop
             }
 
             // P1/P2-Markierung im Kampf (eigene Option, unabhängig vom Status-HUD)
-            try { BattleCoop.DrawMarkers(); }
+            try { BattleCoop.DrawMarkers(); Ui.PlayerMarkers.Draw(); }
             catch (Exception ex)
             {
                 if (!_guiErrorLogged)

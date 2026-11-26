@@ -50,6 +50,8 @@ namespace FF9Coop
         public Boolean ReadySignal = true;
         /// <summary>P1/P2-Markierung neben den Namen in der Kampf-Gruppenanzeige.</summary>
         public Boolean BattleMarkers = true;
+        /// <summary>"Ich bin hier"-Hand je Spieler: 0 = Original, 1 = beim Betreten (wie im Spiel), 2 = immer.</summary>
+        public Int32 PlayerHands = Ui.PlayerMarkers.ModeOnEnter;
 
         /// <summary>"Wer spielt …?"-Fenster, wenn das Spiel die gesteuerte Figur wechselt.</summary>
         public Int32 SoloSceneMode = SoloAsk;
@@ -112,6 +114,7 @@ namespace FF9Coop
             cfg.BattlePauseWhileChoosing = GetBool(ini, "Control", "BattlePause", cfg.BattlePauseWhileChoosing);
             cfg.ReadySignal = GetBool(ini, "Control", "ReadySignal", cfg.ReadySignal);
             cfg.BattleMarkers = GetBool(ini, "Control", "BattleMarkers", cfg.BattleMarkers);
+            cfg.PlayerHands = Clamp(GetInt(ini, "Control", "PlayerHands", cfg.PlayerHands), 0, 2);
             cfg.SoloSceneMode = ParseSoloMode(GetString(ini, "Control", "SoloScenePrompt", null), cfg.PlayerCount);
             if (Single.TryParse(GetString(ini, "Companion", "WorldLeash", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single wleash))
                 cfg.WorldLeash = Math.Max(2f, wleash);
@@ -186,6 +189,7 @@ namespace FF9Coop
             Set(lines, "Control", "BattlePause", BattlePauseWhileChoosing ? "1" : "0");
             Set(lines, "Control", "ReadySignal", ReadySignal ? "1" : "0");
             Set(lines, "Control", "BattleMarkers", BattleMarkers ? "1" : "0");
+            Set(lines, "Control", "PlayerHands", PlayerHands.ToString());
             Set(lines, "Control", "SoloScenePrompt",
                 SoloSceneMode == SoloAsk ? "Ask" : SoloSceneMode == SoloKeepLeader ? "Keep" : "P" + SoloSceneMode);
             Set(lines, "Companion", "Enabled", CompanionEnabled ? "1" : "0");

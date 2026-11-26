@@ -84,6 +84,8 @@ namespace FF9Coop.Game
         public static Vector3 WorldPosition => s_go != null ? s_go.transform.position : Vector3.zero;
         /// <summary>Blickrichtung in Grad, gleiche Konvention wie Actor.rotAngle[1].</summary>
         public static Single Yaw => s_yaw;
+        /// <summary>Zeitpunkt (realtimeSinceStartup), seit dem der Begleiter wieder sichtbar ist.</summary>
+        public static Single ShownSince { get; private set; }
 
         public static void Update()
         {
@@ -157,7 +159,10 @@ namespace FF9Coop.Game
                 return;
             }
             if (!s_go.activeSelf)
+            {
                 s_go.SetActive(true);
+                ShownSince = Time.realtimeSinceStartup;
+            }
 
             Move(cfg, map);
         }
@@ -275,6 +280,7 @@ namespace FF9Coop.Game
             s_go = go;
             s_code = code;
             s_currentClip = null;
+            ShownSince = Time.realtimeSinceStartup;
             PlaceBehindLeader(map);
             ForceNonCulling(map, go);
             CoopLog.Message($"Begleiter {code} erscheint auf Karte {s_mapNo}");

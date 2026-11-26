@@ -211,6 +211,8 @@ namespace FF9Coop.Ui
             Header("Begleiter");
             Add("Begleiter", "Zweite sichtbare Figur, gesteuert vom Spieler, der nicht Leader ist. Kann NPCs ansprechen (A), Truhen öffnen und handeln.",
                 () => new[] { "An", "Aus" }, () => cfg.CompanionEnabled ? 0 : 1, v => cfg.CompanionEnabled = v == 0);
+            Add("Spieler-Hand", "Die „Ich bin hier“-Hand über den Figuren, eingefärbt je Spieler und mit Spielernummer. „Beim Betreten“: wie im Spiel kurz nach einem Bildschirmwechsel. „Original“: nur die normale Hand über dem Leader.",
+                () => new[] { "Original", "Beim Betreten", "Immer" }, () => cfg.PlayerHands, v => cfg.PlayerHands = v);
             Add("Auf der Weltkarte", "Begleiter auch auf der Weltkarte zeigen (nur zu Fuß, nicht auf Chocobo oder Luftschiff).",
                 () => new[] { "An", "Aus" }, () => cfg.WorldCompanionEnabled ? 0 : 1, v => cfg.WorldCompanionEnabled = v == 0);
             List<CharacterId> companions = new List<CharacterId> { CharacterId.NONE };

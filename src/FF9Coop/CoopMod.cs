@@ -8,7 +8,7 @@ namespace FF9Coop
 {
     internal static class CoopMod
     {
-        public const String Version = "0.7.0";
+        public const String Version = "0.8.0";
 
         public static CoopConfig Config { get; private set; } = new CoopConfig();
 
@@ -47,6 +47,8 @@ namespace FF9Coop
             InputPatches.Apply(harmony, step => File.WriteAllText(marker, step));
             File.WriteAllText(marker, "Patch BattleHUD.IsNativeEnableAtb");
             Game.BattleCoop.Apply(harmony);
+            File.WriteAllText(marker, "Patch BubbleUI.FilterFlags");
+            Ui.PlayerMarkers.Apply(harmony);
             File.Delete(marker);
             CoopLog.Message("Initialisierung abgeschlossen");
         }
