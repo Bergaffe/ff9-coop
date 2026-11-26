@@ -156,7 +156,9 @@ namespace FF9Coop.Game
             Single leaderYaw = leader.rot1;
             Vector3 forward = Quaternion.Euler(0f, leaderYaw, 0f) * new Vector3(0f, 0f, -1f);
             Vector3 p = leader.pos - forward * SpawnBehind;
-            if (!TryGround(ref p))
+            if (TryGround(ref p, out Int32 id))
+                p.y += Slice(leader, id, 1f, true); // z. B. im Wald sofort eingesunken erscheinen
+            else
                 p = leader.pos;
             s_holder.transform.position = p;
             s_yaw = leaderYaw;
@@ -197,14 +199,17 @@ namespace FF9Coop.Game
             Single tps = Configuration.Graphics.WorldTPS > 0 ? Configuration.Graphics.WorldTPS : 30;
             Vector3 step = dir * SpeedPerTick * tps * mag * Time.deltaTime;
             Vector3 next = pos + step;
-            if (!TryGround(ref next))
+            Int32 groundId;
+            if (!TryGround(ref next, out groundId))
             {
                 // an Küsten/Bergen entlanggleiten
                 Vector3 alongX = new Vector3(next.x, pos.y, pos.z), alongZ = new Vector3(pos.x, pos.y, next.z);
-                if (TryGround(ref alongX)) next = alongX;
-                else if (TryGround(ref alongZ)) next = alongZ;
-                else next = pos;
+                if (TryGround(ref alongX, out groundId)) next = alongX;
+                else if (TryGround(ref alongZ, out groundId)) next = alongZ;
+                else { next = pos; groundId = -1; }
             }
+            if (groundId >= 0)
+                next.y += Slice(leader, groundId, tps * Time.deltaTime, false);
             s_holder.transform.position = next;
 
             Single target = Mathf.Atan2(-dir.x, -dir.z) * Mathf.Rad2Deg;
@@ -213,11 +218,13 @@ namespace FF9Coop.Game
             Play(mag > 0.6f ? "RUN" : "WALK");
         }
 
-        /// <summary>Bodenhöhe per Spiel-Strahl; false, wenn dort nicht zu Fuß begehbar (Wasser, Berge, …).</summary>
-        private static Boolean TryGround(ref Vector3 p)
+        /// <summary>
+        /// Bodenhöhe per Spiel-Strahl (ohne Einsinken); false, wenn dort nicht zu Fuß begehbar (Wasser, Berge, …).
+        /// </summary>
+        private static Boolean TryGround(ref Vector3 p, out Int32 id)
         {
             Vector3 probe = p;
-            Int32 id = 0;
+            id = 0;
             ff9.w_cellHit(ref probe, ref id, out Int32 pno, null, out Single height);
             if (pno < 0)
                 return false;
@@ -225,6 +232,35 @@ namespace FF9Coop.Game
                 return false;
             p.y = height;
             return true;
+        }
+
+        private static Boolean TryGround(ref Vector3 p) => TryGround(ref p, out _);
+
+        private static Single s_slice;
+
+        /// <summary>
+        /// Einsinken ins Gelände wie bei der echten Figur (ff9.w_movementSetheight): Im Wald versinkt die Figur
+        /// zwischen den Bäumen (sofort), in flachem Wasser sinkt sie sanft ein (0,078 Einheiten pro Tick).
+        /// Gleiche Tabelle (w_movementGetSliceHeight) und gleicher slice_type wie der Leader.
+        /// </summary>
+        private static Single Slice(WMActor leader, Int32 groundId, Single ticks, Boolean immediate)
+        {
+            Int32 sliceType = 1;
+            Actor actor = leader.originalActor;
+            if (actor != null && ff9.w_moveCHRStatus != null && actor.index < ff9.w_moveCHRStatus.Length)
+                sliceType = ff9.w_moveCHRStatus[actor.index].slice_type;
+
+            Single target = ff9.w_movementGetSliceHeight(sliceType, groundId, out Boolean inForest);
+            if (immediate || inForest || Math.Abs(target) < 0.001f)
+            {
+                s_slice = target;
+            }
+            else
+            {
+                Single step = 0.078125f * Math.Max(1f, ticks);
+                s_slice = Mathf.MoveTowards(s_slice, target, step);
+            }
+            return s_slice;
         }
 
         private static void Play(String suffix)
