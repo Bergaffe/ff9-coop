@@ -45,6 +45,9 @@ namespace FF9Coop
         public Single CompanionLeash = 2000f;
         public KeyCode CompanionRunKey = KeyCode.LeftShift;
 
+        /// <summary>Öffnet das Koop-Menü (Controller: L3+R3).</summary>
+        public KeyCode MenuKey = KeyCode.K;
+
         /// <summary>Charakter → Spieler (1–4); 0 oder fehlend = automatisch nach Kampf-Slot.</summary>
         public readonly Dictionary<CharacterId, Int32> Owners = new Dictionary<CharacterId, Int32>();
 
@@ -86,6 +89,7 @@ namespace FF9Coop
             if (Single.TryParse(GetString(ini, "Companion", "Leash", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single leash))
                 cfg.CompanionLeash = Math.Max(200f, leash);
             cfg.CompanionRunKey = GetKey(ini, "Companion", "RunKey", cfg.CompanionRunKey);
+            cfg.MenuKey = GetKey(ini, "Control", "MenuKey", cfg.MenuKey);
 
             if (ini.TryGetValue("owners", out Dictionary<String, String> owners))
             {
@@ -99,6 +103,94 @@ namespace FF9Coop
                 }
             }
             return cfg;
+        }
+
+        /// <summary>Tiefe Kopie (für "Abbrechen" im Menü).</summary>
+        public CoopConfig Clone()
+        {
+            CoopConfig c = (CoopConfig)MemberwiseClone();
+            CopyArraysInto(c);
+            return c;
+        }
+
+        /// <summary>Übernimmt alle Werte aus <paramref name="src"/> in dieses Objekt (die Referenz bleibt gleich).</summary>
+        public void CopyFrom(CoopConfig src)
+        {
+            foreach (System.Reflection.FieldInfo f in typeof(CoopConfig).GetFields())
+                if (!f.IsInitOnly && !f.IsLiteral)
+                    f.SetValue(this, f.GetValue(src));
+            Array.Copy(src.PadPlayer, PadPlayer, MaxPads);
+            Owners.Clear();
+            foreach (KeyValuePair<CharacterId, Int32> kv in src.Owners)
+                Owners[kv.Key] = kv.Value;
+        }
+
+        private void CopyArraysInto(CoopConfig c)
+        {
+            // readonly-Felder per Reflection neu setzen, damit die Kopie eigene Arrays/Dictionaries hat
+            typeof(CoopConfig).GetField(nameof(PadPlayer)).SetValue(c, (Int32[])PadPlayer.Clone());
+            typeof(CoopConfig).GetField(nameof(Owners)).SetValue(c, new Dictionary<CharacterId, Int32>(Owners));
+        }
+
+        /// <summary>Schreibt die im Menü änderbaren Werte in die INI. Kommentare und Reihenfolge bleiben erhalten.</summary>
+        public void Save(String path)
+        {
+            List<String> lines = File.Exists(path) ? new List<String>(File.ReadAllLines(path)) : new List<String>();
+            Set(lines, "Players", "Count", PlayerCount.ToString());
+            Set(lines, "Players", "Leader", LeaderPlayer.ToString());
+            Set(lines, "Players", "Keyboard", KeyboardPlayer.ToString());
+            for (Int32 i = 0; i < MaxPads; i++)
+                Set(lines, "Players", "Pad" + (i + 1), PadPlayer[i].ToString());
+            Set(lines, "Control", "MenuControl", MenuControl.ToString());
+            Set(lines, "Control", "BattleTurnRequest", BattleTurnRequest ? "1" : "0");
+            Set(lines, "Companion", "Enabled", CompanionEnabled ? "1" : "0");
+            Set(lines, "Companion", "Character", CompanionCharacter == CharacterId.NONE ? "Auto" : CompanionCharacter.ToString());
+            foreach (CharacterId id in Enum.GetValues(typeof(CharacterId)))
+            {
+                if (id == CharacterId.NONE)
+                    continue;
+                Set(lines, "Owners", id.ToString(), Owners.TryGetValue(id, out Int32 p) ? p.ToString() : "0");
+            }
+            File.WriteAllText(path, String.Join("\r\n", lines.ToArray()) + "\r\n", new System.Text.UTF8Encoding(false));
+        }
+
+        private static void Set(List<String> lines, String section, String key, String value)
+        {
+            Int32 sectionLine = -1, end = lines.Count;
+            for (Int32 i = 0; i < lines.Count; i++)
+            {
+                String t = lines[i].Trim();
+                if (t.StartsWith("[") && t.EndsWith("]"))
+                {
+                    if (sectionLine >= 0) { end = i; break; }
+                    if (String.Equals(t.Substring(1, t.Length - 2).Trim(), section, StringComparison.OrdinalIgnoreCase))
+                        sectionLine = i;
+                }
+            }
+            if (sectionLine < 0)
+            {
+                lines.Add("");
+                lines.Add("[" + section + "]");
+                lines.Add(key + " = " + value);
+                return;
+            }
+            for (Int32 i = sectionLine + 1; i < end; i++)
+            {
+                String t = lines[i].TrimStart();
+                if (t.StartsWith(";") || t.StartsWith("#"))
+                    continue;
+                Int32 eq = t.IndexOf('=');
+                if (eq > 0 && String.Equals(t.Substring(0, eq).Trim(), key, StringComparison.OrdinalIgnoreCase))
+                {
+                    lines[i] = key + " = " + value;
+                    return;
+                }
+            }
+            // Schlüssel fehlt: vor eventuelle Leerzeilen am Sektionsende einfügen
+            Int32 insert = end;
+            while (insert > sectionLine + 1 && lines[insert - 1].Trim().Length == 0)
+                insert--;
+            lines.Insert(insert, key + " = " + value);
         }
 
         public override String ToString()

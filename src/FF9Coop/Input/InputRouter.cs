@@ -41,6 +41,21 @@ namespace FF9Coop.Input
             PollId++;
 
             CoopConfig cfg = CoopMod.Config;
+
+            // Koop-Menü offen: Das Spiel bekommt gar nichts (das Menü liest die Geräte selbst roh)
+            if (Ui.CoopMenu.IsOpen)
+            {
+                KeyboardAllowed = false;
+                s_effectivePad = -1;
+                Boolean anyPad = false;
+                for (Int32 i = 0; i < PadInput.PadCount; i++)
+                    anyPad |= PadInput.IsConnected(i);
+                if (anyPad)
+                    SetNeutralOrPassThrough();
+                else
+                    HasEffective = false;
+                return;
+            }
             Int32 allowed = CoopContext.GetAllowedPlayers();
             AllowedMask = allowed;
 
@@ -97,6 +112,12 @@ namespace FF9Coop.Input
                 EffectiveState = current;
                 HasEffective = true;
             }
+        }
+
+        /// <summary>Beim nächsten Tick neu wählen und gehaltene Tasten erst nach dem Loslassen durchlassen.</summary>
+        public static void ForceRelease()
+        {
+            s_effectivePad = -1;
         }
 
         private static void SelectPad(Int32 candidates)

@@ -10,6 +10,15 @@ Koop-Multiplayer-Mod für **Final Fantasy IX (Steam)** auf Basis von [Memoria](h
 |---|---|---|
 | Zug anfordern (Kampf, eigener Charakter ist bereit) | **Y** / Dreieck | **T** |
 | Leader übernehmen (Feld/Weltkarte ohne Cutscene, nur der Nicht-Leader) | **Back/Select 1 s halten** | **L 1 s halten** |
+| Koop-Menü öffnen/schließen (alle Zuweisungen; das Spiel pausiert) | **L3 + R3** (beide Sticks drücken) | **K** |
+
+Im Koop-Menü stellst du ein:
+- Spieleranzahl, Leader und wer Menüs bedienen darf
+- welcher Spieler die Tastatur und welcher jeden Controller benutzt. Ein ● zeigt, welcher Controller gerade gedrückt wird.
+- welcher Spieler im Kampf welchen Charakter steuert
+- den Begleiter in Städten: an/aus und welcher Charakter
+
+Änderungen wirken sofort. „Speichern und schließen“ schreibt sie in die `FF9Coop.ini`, „Abbrechen“ (B/Esc) verwirft sie.
 
 Tasten und Haltedauer lassen sich in `FF9Coop.ini` ändern (`TurnRequestKey`, `LeaderKey`, `LeaderHoldSeconds`).
 

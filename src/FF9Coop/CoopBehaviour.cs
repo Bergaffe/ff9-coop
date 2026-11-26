@@ -16,6 +16,7 @@ namespace FF9Coop
         private GUIStyle _style;
         private Texture2D _barTexture;
         private Boolean _updateErrorLogged;
+        private Boolean _guiErrorLogged;
 
         /// <summary>Kurze Einblendung unter der Statuszeile.</summary>
         public static void Notify(String text)
@@ -28,6 +29,9 @@ namespace FF9Coop
         {
             try
             {
+                Ui.CoopMenu.Update();
+                if (Ui.CoopMenu.IsOpen)
+                    return; // Spiel ist pausiert, die Koop-Logik ruht
                 BattleTurnRequest.Update();
                 LeaderControl.Update();
                 Companion.Update(); // fängt eigene Fehler ab und schaltet sich nach 3 Fehlern ab
@@ -44,6 +48,22 @@ namespace FF9Coop
 
         private void OnGUI()
         {
+            if (Ui.CoopMenu.IsOpen)
+            {
+                // Menü über allem anderen zeichnen
+                GUI.depth = -1000;
+                try { Ui.CoopMenu.Draw(); }
+                catch (Exception ex)
+                {
+                    if (!_guiErrorLogged)
+                    {
+                        _guiErrorLogged = true;
+                        CoopLog.Error(ex, "Fehler beim Zeichnen des Koop-Menüs");
+                    }
+                }
+                return;
+            }
+
             if (!CoopMod.Config.ShowHud || !CoopMod.Config.Enabled)
                 return;
 
