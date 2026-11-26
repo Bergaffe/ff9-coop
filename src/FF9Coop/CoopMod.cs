@@ -8,7 +8,7 @@ namespace FF9Coop
 {
     internal static class CoopMod
     {
-        public const String Version = "0.8.0";
+        public const String Version = "0.9.0";
 
         public static CoopConfig Config { get; private set; } = new CoopConfig();
 
@@ -18,13 +18,13 @@ namespace FF9Coop
         /// <summary>Läuft im ScriptsLoader-Thread (Titelbildschirm). Hier keine Unity-Objekte erzeugen.</summary>
         public static void Initialize()
         {
-            CoopLog.Message($"Version {Version} geladen aus {Bootstrap.ModDirectory}");
+            CoopLog.Message($"Version {Version} loaded from {Bootstrap.ModDirectory}");
             Config = CoopConfig.Load(Path.Combine(Bootstrap.ModDirectory, "FF9Coop.ini"));
-            CoopLog.Message("Konfiguration: " + Config);
+            CoopLog.Message("Configuration: " + Config);
 
             if (!Config.Enabled)
             {
-                CoopLog.Message("Deaktiviert (FF9Coop.ini: [Main] Enabled = 0)");
+                CoopLog.Message("Disabled (FF9Coop.ini: [Main] Enabled = 0)");
                 return;
             }
 
@@ -34,23 +34,23 @@ namespace FF9Coop
             String marker = Path.Combine(Bootstrap.ModDirectory, "FF9Coop.patching");
             if (File.Exists(marker))
             {
-                CoopLog.Warning("Letzter Start ist beim Patchen abgestürzt (" + File.ReadAllText(marker).Trim() + "). " +
-                                "Mod bleibt deaktiviert. Zum erneuten Versuch die Datei FF9Coop.patching löschen.");
+                CoopLog.Warning("The last start crashed while patching (" + File.ReadAllText(marker).Trim() + "). " +
+                                "Mod stays disabled. Delete the file FF9Coop.patching to try again.");
                 Config.Enabled = false;
                 return;
             }
 
             File.WriteAllText(marker, "Harmony-Init");
-            CoopLog.Message("Erzeuge Harmony-Instanz …");
+            CoopLog.Message("Creating Harmony instance …");
             HarmonyInstance harmony = HarmonyInstance.Create("ff9coop");
-            CoopLog.Message("Harmony bereit, wende Patches an …");
+            CoopLog.Message("Harmony ready, applying patches …");
             InputPatches.Apply(harmony, step => File.WriteAllText(marker, step));
             File.WriteAllText(marker, "Patch BattleHUD.IsNativeEnableAtb");
             Game.BattleCoop.Apply(harmony);
             File.WriteAllText(marker, "Patch BubbleUI.FilterFlags");
             Ui.PlayerMarkers.Apply(harmony);
             File.Delete(marker);
-            CoopLog.Message("Initialisierung abgeschlossen");
+            CoopLog.Message("Initialization complete");
         }
 
         /// <summary>Erzeugt beim ersten Frame-Tick (Hauptthread) das Host-GameObject.</summary>
@@ -61,7 +61,7 @@ namespace FF9Coop
             s_host = new GameObject("FF9Coop");
             UnityEngine.Object.DontDestroyOnLoad(s_host);
             s_host.AddComponent<CoopBehaviour>();
-            CoopLog.Message("Laufzeit-Objekt erstellt");
+            CoopLog.Message("Runtime object created");
         }
 
         public static void ReportTickError(Exception ex)
@@ -69,7 +69,7 @@ namespace FF9Coop
             if (s_tickErrorLogged)
                 return;
             s_tickErrorLogged = true;
-            CoopLog.Error(ex, "Fehler im Input-Tick (weitere werden unterdrückt)");
+            CoopLog.Error(ex, "Error in input tick (further errors suppressed)");
         }
     }
 }

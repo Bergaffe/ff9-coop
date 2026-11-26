@@ -30,6 +30,7 @@ namespace FF9Coop.Ui
             public Action<Int32> Set;
             public Action Confirm;   // Aktions-Zeile (Speichern/Abbrechen)
             public Int32 Pad = -1;   // Controller-Zeile: Slot für die "drückt gerade"-Anzeige
+            public Boolean Rebuild;  // changing the value rebuilds all rows (player count, language)
             public Boolean IsAction => Confirm != null;
             public Boolean Selectable => !Header;
         }
@@ -104,13 +105,13 @@ namespace FF9Coop.Ui
             try
             {
                 CoopMod.Config.Save(Path.Combine(Bootstrap.ModDirectory, "FF9Coop.ini"));
-                CoopLog.Message("Einstellungen gespeichert: " + CoopMod.Config);
-                CoopBehaviour.Notify("Koop-Einstellungen gespeichert");
+                CoopLog.Message("Settings saved: " + CoopMod.Config);
+                CoopBehaviour.Notify(Lang.T("Co-op settings saved", "Koop-Einstellungen gespeichert"));
             }
             catch (Exception ex)
             {
-                CoopLog.Error(ex, "Speichern der FF9Coop.ini fehlgeschlagen");
-                CoopBehaviour.Notify("Speichern fehlgeschlagen (siehe Memoria.log)");
+                CoopLog.Error(ex, "Saving FF9Coop.ini failed");
+                CoopBehaviour.Notify(Lang.T("Saving failed (see Memoria.log)", "Speichern fehlgeschlagen (siehe Memoria.log)"));
             }
             FF9Sfx.FF9SFX_Play(103);
             Close();
@@ -121,7 +122,7 @@ namespace FF9Coop.Ui
             if (s_snapshot != null)
                 CoopMod.Config.CopyFrom(s_snapshot);
             FF9Sfx.FF9SFX_Play(101);
-            CoopBehaviour.Notify("Änderungen verworfen");
+            CoopBehaviour.Notify(Lang.T("Changes discarded", "Änderungen verworfen"));
             Close();
         }
 
@@ -141,21 +142,31 @@ namespace FF9Coop.Ui
             s_rows.Clear();
             CoopConfig cfg = CoopMod.Config;
 
-            Header("Spieler");
-            Add("Anzahl Spieler", "Wie viele Spieler gemeinsam spielen.",
+            Header(Lang.T("Players", "Spieler"));
+            Row language = Add("Language / Sprache", Lang.T(
+                    "Language of the co-op menu and messages. \"Auto\" follows the game language.",
+                    "Sprache von Koop-Menü und Meldungen. „Auto“ richtet sich nach der Spielsprache."),
+                () => new[] { "Auto", "English", "Deutsch" }, () => cfg.Language, v => cfg.Language = v);
+            language.Rebuild = true;
+            Row count = Add(Lang.T("Number of players", "Anzahl Spieler"), Lang.T("How many players play together.", "Wie viele Spieler gemeinsam spielen."),
                 () => new[] { "1", "2", "3", "4" }, () => cfg.PlayerCount - 1, v => SetPlayerCount(v + 1));
-            Add("Leader", "Steuert die Hauptfigur in Städten, Dungeons und auf der Weltkarte und löst Story-Ereignisse aus.",
+            count.Rebuild = true; // option lists depend on the player count
+            Add("Leader", Lang.T(
+                    "Controls the main character in towns, dungeons and on the world map and triggers story events.",
+                    "Steuert die Hauptfigur in Städten, Dungeons und auf der Weltkarte und löst Story-Ereignisse aus."),
                 PlayerOptions, () => cfg.LeaderPlayer - 1, v => cfg.LeaderPlayer = v + 1);
-            Add("Menüs", "Wer das Hauptmenü, Shops und Ähnliches bedienen darf.",
-                () => new[] { "Alle", "Leader" }, () => cfg.MenuControl == MenuControlMode.Leader ? 1 : 0,
+            Add(Lang.T("Menus", "Menüs"), Lang.T("Who may use the main menu, shops and the like.", "Wer das Hauptmenü, Shops und Ähnliches bedienen darf."),
+                () => new[] { Lang.T("Everyone", "Alle"), "Leader" }, () => cfg.MenuControl == MenuControlMode.Leader ? 1 : 0,
                 v => cfg.MenuControl = v == 1 ? MenuControlMode.Leader : MenuControlMode.Anyone);
-            Add("Solo-Abschnitte", "Wer spielt, wenn das Spiel nur eine Figur steuern lässt (z. B. Vivi allein in Alexandria). „Fragen“: Fenster, wer zuerst A drückt, übernimmt. „Leader bleibt“: ohne Nachfrage weiter. P1/P2…: dieser Spieler übernimmt immer.",
+            Add(Lang.T("Solo sections", "Solo-Abschnitte"), Lang.T(
+                    "Who plays when the game only lets you control one character (e.g. Vivi alone in Alexandria). \"Ask\": a window, whoever presses A first takes over. \"Keep leader\": continue without asking. P1/P2…: this player always takes over.",
+                    "Wer spielt, wenn das Spiel nur eine Figur steuern lässt (z. B. Vivi allein in Alexandria). „Fragen“: Fenster, wer zuerst A drückt, übernimmt. „Leader bleibt“: ohne Nachfrage weiter. P1/P2…: dieser Spieler übernimmt immer."),
                 () =>
                 {
                     String[] po = PlayerOptions();
                     String[] o = new String[po.Length + 2];
-                    o[0] = "Fragen";
-                    o[1] = "Leader bleibt";
+                    o[0] = Lang.T("Ask", "Fragen");
+                    o[1] = Lang.T("Keep leader", "Leader bleibt");
                     Array.Copy(po, 0, o, 2, po.Length);
                     return o;
                 },
@@ -163,18 +174,20 @@ namespace FF9Coop.Ui
                 () => cfg.SoloSceneMode == CoopConfig.SoloAsk ? 0 : cfg.SoloSceneMode + 1,
                 v => cfg.SoloSceneMode = v == 0 ? CoopConfig.SoloAsk : v - 1);
 
-            Header("Eingabegeräte");
-            Add("Tastatur", "Welcher Spieler die Tastatur benutzt.",
+            Header(Lang.T("Input devices", "Eingabegeräte"));
+            Add(Lang.T("Keyboard", "Tastatur"), Lang.T("Which player uses the keyboard.", "Welcher Spieler die Tastatur benutzt."),
                 PlayerOptions, () => cfg.KeyboardPlayer - 1, v => cfg.KeyboardPlayer = v + 1);
             for (Int32 i = 0; i < CoopConfig.MaxPads; i++)
             {
                 Int32 pad = i;
-                Row r = Add($"Controller {pad + 1}", "Welcher Spieler diesen Controller benutzt. Drück eine Taste am Controller, um ihn zu erkennen.",
+                Row r = Add($"Controller {pad + 1}", Lang.T(
+                        "Which player uses this controller. Press a button on a controller to identify it.",
+                        "Welcher Spieler diesen Controller benutzt. Drück eine Taste am Controller, um ihn zu erkennen."),
                     PlayerOptions, () => cfg.PadPlayer[pad] - 1, v => cfg.PadPlayer[pad] = v + 1);
                 r.Pad = pad;
             }
 
-            Header("Kampf: Wer steuert wen");
+            Header(Lang.T("Battle: who controls whom", "Kampf: Wer steuert wen"));
             PLAYER[] members = FF9StateSystem.Common.FF9?.party?.member ?? new PLAYER[0];
             Boolean anyMember = false;
             for (Int32 i = 0; i < members.Length; i++)
@@ -185,7 +198,9 @@ namespace FF9Coop.Ui
                 anyMember = true;
                 CharacterId id = p.Index;
                 Int32 slot = i; // eigene Kopie pro Zeile, sonst teilen sich alle Lambdas die Schleifenvariable
-                Add(CharacterName(id), "Wessen Controller im Kampf das Kommandomenü dieses Charakters bedient. „Auto“ verteilt nach Kampfposition.",
+                Add(CharacterName(id), Lang.T(
+                        "Whose controller operates this character's command menu in battle. \"Auto\" assigns by battle position.",
+                        "Wessen Controller im Kampf das Kommandomenü dieses Charakters bedient. „Auto“ verteilt nach Kampfposition."),
                     () =>
                     {
                         String[] po = PlayerOptions();
@@ -198,37 +213,58 @@ namespace FF9Coop.Ui
                     v => { if (v == 0) cfg.Owners.Remove(id); else cfg.Owners[id] = v; });
             }
             if (!anyMember)
-                Header("(keine Party geladen)");
-            Add("Zug anfordern", "Ist ein eigener Charakter bereit, holt ihn der wartende Spieler mit Y bzw. T.",
-                () => new[] { "An", "Aus" }, () => cfg.BattleTurnRequest ? 0 : 1, v => cfg.BattleTurnRequest = v == 0);
-            Add("ATB bei Befehlswahl", "„Anhalten“: Die Zeit steht still, solange ein Spieler im Kommandomenü wählt. Fair bei Absprachen, Online-Verzögerung und schweren Mods.",
-                () => new[] { "Wie im Spiel", "Anhalten" }, () => cfg.BattlePauseWhileChoosing ? 1 : 0, v => cfg.BattlePauseWhileChoosing = v == 1);
-            Add("Bereit-Signal", "Kurze Vibration am eigenen Controller, sobald einer deiner Charaktere bereit ist.",
-                () => new[] { "Vibration", "Aus" }, () => cfg.ReadySignal ? 0 : 1, v => cfg.ReadySignal = v == 0);
-            Add("P1/P2-Markierung", "Zeigt im Kampf neben jedem Namen, welcher Spieler den Charakter steuert.",
-                () => new[] { "An", "Aus" }, () => cfg.BattleMarkers ? 0 : 1, v => cfg.BattleMarkers = v == 0);
+                Header(Lang.T("(no party loaded)", "(keine Party geladen)"));
+            Func<String[]> onOff = () => new[] { Lang.T("On", "An"), Lang.T("Off", "Aus") };
+            Add(Lang.T("Turn request", "Zug anfordern"), Lang.T(
+                    "When one of your characters is ready, the waiting player takes it over with Y or T.",
+                    "Ist ein eigener Charakter bereit, holt ihn der wartende Spieler mit Y bzw. T."),
+                onOff, () => cfg.BattleTurnRequest ? 0 : 1, v => cfg.BattleTurnRequest = v == 0);
+            Add(Lang.T("ATB while choosing", "ATB bei Befehlswahl"), Lang.T(
+                    "\"Pause\": time stands still while a player is choosing in the command menu. Fair for coordinating, online delay and hard mods.",
+                    "„Anhalten“: Die Zeit steht still, solange ein Spieler im Kommandomenü wählt. Fair bei Absprachen, Online-Verzögerung und schweren Mods."),
+                () => new[] { Lang.T("As in game", "Wie im Spiel"), Lang.T("Pause", "Anhalten") }, () => cfg.BattlePauseWhileChoosing ? 1 : 0, v => cfg.BattlePauseWhileChoosing = v == 1);
+            Add(Lang.T("Ready signal", "Bereit-Signal"), Lang.T(
+                    "Short vibration on your own controller as soon as one of your characters is ready.",
+                    "Kurze Vibration am eigenen Controller, sobald einer deiner Charaktere bereit ist."),
+                () => new[] { "Vibration", Lang.T("Off", "Aus") }, () => cfg.ReadySignal ? 0 : 1, v => cfg.ReadySignal = v == 0);
+            Add(Lang.T("P1/P2 markers", "P1/P2-Markierung"), Lang.T(
+                    "Shows next to each name in battle which player controls the character.",
+                    "Zeigt im Kampf neben jedem Namen, welcher Spieler den Charakter steuert."),
+                onOff, () => cfg.BattleMarkers ? 0 : 1, v => cfg.BattleMarkers = v == 0);
 
-            Header("Begleiter");
-            Add("Begleiter", "Zweite sichtbare Figur, gesteuert vom Spieler, der nicht Leader ist. Kann NPCs ansprechen (A), Truhen öffnen und handeln.",
-                () => new[] { "An", "Aus" }, () => cfg.CompanionEnabled ? 0 : 1, v => cfg.CompanionEnabled = v == 0);
-            Add("Spieler-Hand", "Die „Ich bin hier“-Hand über den Figuren, eingefärbt je Spieler und mit Spielernummer. „Beim Betreten“: wie im Spiel kurz nach einem Bildschirmwechsel. „Original“: nur die normale Hand über dem Leader.",
-                () => new[] { "Original", "Beim Betreten", "Immer" }, () => cfg.PlayerHands, v => cfg.PlayerHands = v);
-            Add("Auf der Weltkarte", "Begleiter auch auf der Weltkarte zeigen (nur zu Fuß, nicht auf Chocobo oder Luftschiff).",
-                () => new[] { "An", "Aus" }, () => cfg.WorldCompanionEnabled ? 0 : 1, v => cfg.WorldCompanionEnabled = v == 0);
+            Header(Lang.T("Companion", "Begleiter"));
+            Add(Lang.T("Companion", "Begleiter"), Lang.T(
+                    "Second visible character, controlled by the player who is not the leader. Can talk to NPCs (A), open chests and shop.",
+                    "Zweite sichtbare Figur, gesteuert vom Spieler, der nicht Leader ist. Kann NPCs ansprechen (A), Truhen öffnen und handeln."),
+                onOff, () => cfg.CompanionEnabled ? 0 : 1, v => cfg.CompanionEnabled = v == 0);
+            Add(Lang.T("Player hand", "Spieler-Hand"), Lang.T(
+                    "The \"I'm here\" hand above the characters, coloured per player and with the player number. \"On enter\": like the game, shortly after a screen change. \"Original\": only the normal hand above the leader.",
+                    "Die „Ich bin hier“-Hand über den Figuren, eingefärbt je Spieler und mit Spielernummer. „Beim Betreten“: wie im Spiel kurz nach einem Bildschirmwechsel. „Original“: nur die normale Hand über dem Leader."),
+                () => new[] { "Original", Lang.T("On enter", "Beim Betreten"), Lang.T("Always", "Immer") }, () => cfg.PlayerHands, v => cfg.PlayerHands = v);
+            Add(Lang.T("On the world map", "Auf der Weltkarte"), Lang.T(
+                    "Show the companion on the world map too (on foot only, not on chocobo or airship).",
+                    "Begleiter auch auf der Weltkarte zeigen (nur zu Fuß, nicht auf Chocobo oder Luftschiff)."),
+                onOff, () => cfg.WorldCompanionEnabled ? 0 : 1, v => cfg.WorldCompanionEnabled = v == 0);
             List<CharacterId> companions = new List<CharacterId> { CharacterId.NONE };
             foreach (PLAYER p in members)
                 if (p != null && Game.Companion.TryGetModelCode(p.Index, out _))
                     companions.Add(p.Index);
             if (cfg.CompanionCharacter != CharacterId.NONE && !companions.Contains(cfg.CompanionCharacter))
                 companions.Add(cfg.CompanionCharacter);
-            Add("Begleiter-Figur", "Welcher Charakter aus der Gruppe den Leader begleitet. „Auto“ nimmt das erste Gruppenmitglied, das nicht Leader ist.",
+            Add(Lang.T("Companion character", "Begleiter-Figur"), Lang.T(
+                    "Which party member accompanies the leader. \"Auto\" takes the first party member who is not the leader.",
+                    "Welcher Charakter aus der Gruppe den Leader begleitet. „Auto“ nimmt das erste Gruppenmitglied, das nicht Leader ist."),
                 () => companions.ConvertAll(c => c == CharacterId.NONE ? "Auto" : CharacterName(c)).ToArray(),
                 () => Math.Max(0, companions.IndexOf(cfg.CompanionCharacter)),
                 v => cfg.CompanionCharacter = companions[v]);
 
             Header("");
-            Action("Speichern und schließen", "Einstellungen übernehmen und in FF9Coop.ini speichern. (Auch: K bzw. L3+R3)", SaveAndClose);
-            Action("Abbrechen", "Alle Änderungen seit dem Öffnen verwerfen. (Auch: B bzw. Esc)", CancelAndClose);
+            Action(Lang.T("Save and close", "Speichern und schließen"), Lang.T(
+                    "Apply the settings and save them to FF9Coop.ini. (Also: K or L3+R3)",
+                    "Einstellungen übernehmen und in FF9Coop.ini speichern. (Auch: K bzw. L3+R3)"), SaveAndClose);
+            Action(Lang.T("Cancel", "Abbrechen"), Lang.T(
+                    "Discard all changes since opening. (Also: B or Esc)",
+                    "Alle Änderungen seit dem Öffnen verwerfen. (Auch: B bzw. Esc)"), CancelAndClose);
         }
 
         private static void SetPlayerCount(Int32 n)
@@ -381,10 +417,10 @@ namespace FF9Coop.Ui
             Int32 v = ((r.Get() + delta) % count + count) % count;
             r.Set(v);
             FF9Sfx.FF9SFX_Play(103);
-            if (r.Label == "Anzahl Spieler")
+            if (r.Rebuild)
             {
                 Int32 keep = s_cursor;
-                BuildRows(); // Optionslisten hängen von der Spielerzahl ab
+                BuildRows(); // option lists / texts depend on this value
                 s_cursor = keep;
             }
         }
@@ -417,7 +453,7 @@ namespace FF9Coop.Ui
             // Titel-Fenster (wie "Konfig." oben links im FF9-Menü)
             Rect title = new Rect(left, 40f * s, 420f * s, 76f * s);
             Ff9Skin.Window(title);
-            Ff9Skin.Label(Ff9Skin.Inset(title, pad * 0.8f), "Koop-Einstellungen", Ff9Skin.TextColor, 1.05f);
+            Ff9Skin.Label(Ff9Skin.Inset(title, pad * 0.8f), Lang.T("Co-op Settings", "Koop-Einstellungen"), Ff9Skin.TextColor, 1.05f);
 
             // Hilfe-Fenster unten
             Single helpH = 120f * s;
@@ -484,13 +520,13 @@ namespace FF9Coop.Ui
             Ff9Skin.Window(help);
             String helpText = s_cursor >= 0 && s_cursor < s_rows.Count ? s_rows[s_cursor].Help : "";
             if (s_rows[s_cursor].Pad >= 0 && !PadInput.IsConnected(s_rows[s_cursor].Pad))
-                helpText += " (Nicht verbunden)";
+                helpText += Lang.T(" (Not connected)", " (Nicht verbunden)");
             Rect helpInner = Ff9Skin.Inset(help, pad);
             Ff9Skin.Label(helpInner, Wrap(helpText, helpInner.width), Ff9Skin.TextColor, 0.8f, TextAnchor.UpperLeft);
 
             // Bedienhinweis rechts im Titel
             Ff9Skin.Label(new Rect(title.xMax + 20f * s, title.y, width - title.width - 20f * s, title.height),
-                "↑↓ Auswahl   ←→ Ändern   A/Enter   B/Esc Abbrechen", Ff9Skin.DimColor, 0.7f, TextAnchor.MiddleRight);
+                Lang.T("↑↓ Select   ←→ Change   A/Enter   B/Esc Cancel", "↑↓ Auswahl   ←→ Ändern   A/Enter   B/Esc Abbrechen"), Ff9Skin.DimColor, 0.7f, TextAnchor.MiddleRight);
         }
 
         private static void DrawOptions(Row r, Rect area, Boolean selected)

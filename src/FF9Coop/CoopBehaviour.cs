@@ -50,7 +50,7 @@ namespace FF9Coop
                 if (!_updateErrorLogged)
                 {
                     _updateErrorLogged = true;
-                    CoopLog.Error(ex, "Fehler in CoopBehaviour.Update (weitere werden unterdrückt)");
+                    CoopLog.Error(ex, "Error in CoopBehaviour.Update (further errors suppressed)");
                 }
             }
         }
@@ -67,7 +67,7 @@ namespace FF9Coop
                     if (!_guiErrorLogged)
                     {
                         _guiErrorLogged = true;
-                        CoopLog.Error(ex, "Fehler beim Zeichnen des Koop-Menüs");
+                        CoopLog.Error(ex, "Error drawing the co-op menu");
                     }
                 }
                 return;
@@ -80,7 +80,7 @@ namespace FF9Coop
                 if (!_guiErrorLogged)
                 {
                     _guiErrorLogged = true;
-                    CoopLog.Error(ex, "Fehler beim Zeichnen der P1/P2-Markierung");
+                    CoopLog.Error(ex, "Error drawing the player markers");
                 }
             }
 
@@ -99,18 +99,18 @@ namespace FF9Coop
             Single lineHeight = _style.fontSize * 1.6f;
             Single x = 8f, y = 8f, width = Screen.width * 0.6f;
 
-            String text = $"Koop · P{InputRouter.ActivePlayer}";
+            String text = Lang.T("Co-op", "Koop") + $" · P{InputRouter.ActivePlayer}";
             if (CoopContext.Description.Length > 0)
                 text += " · " + CoopContext.Description;
             if (InputRouter.WaitingForRelease)
-                text += " (Tasten loslassen)";
+                text += Lang.T(" (release buttons)", " (Tasten loslassen)");
             ShadowLabel(new Rect(x, y, width, lineHeight), text);
             y += lineHeight;
 
             Single progress = LeaderControl.HoldProgress;
             if (progress > 0f)
             {
-                ShadowLabel(new Rect(x, y, width, lineHeight), "Leader übernehmen …");
+                ShadowLabel(new Rect(x, y, width, lineHeight), Lang.T("Taking over as leader …", "Leader übernehmen …"));
                 y += lineHeight;
                 Single barWidth = _style.fontSize * 10f;
                 Color old = GUI.color;

@@ -38,8 +38,8 @@ namespace FF9Coop.Ui
                 return;
             s_initialized = true;
 
-            try { s_window = FF9UIDataTool.WindowAtlas; } catch (Exception ex) { CoopLog.Error(ex, "Fenster-Atlas nicht ladbar"); }
-            try { s_icon = FF9UIDataTool.IconAtlas; } catch (Exception ex) { CoopLog.Error(ex, "Icon-Atlas nicht ladbar"); }
+            try { s_window = FF9UIDataTool.WindowAtlas; } catch (Exception ex) { CoopLog.Error(ex, "Window atlas could not be loaded"); }
+            try { s_icon = FF9UIDataTool.IconAtlas; } catch (Exception ex) { CoopLog.Error(ex, "Icon atlas could not be loaded"); }
 
             s_frame = Find(s_window, "dialog_frame_info", "dialog_frame_chat");
             s_body = Find(s_window, "dialog_bg", "dialog_body", "dialog_base", "window_bg", "dialog_back");
@@ -50,7 +50,7 @@ namespace FF9Coop.Ui
             s_arrowLeft = Find(s_icon, "arrow_left");
             s_arrowRight = Find(s_icon, "arrow_right");
 
-            CoopLog.Message($"Menü-Skin: Rahmen={Name(s_frame)} Hintergrund={Name(s_body)} Markierung={Name(s_highlight)} Hand={Name(s_hand)}");
+            CoopLog.Message($"Menu skin: frame={Name(s_frame)} body={Name(s_body)} highlight={Name(s_highlight)} hand={Name(s_hand)}");
             LogSpriteList(s_window, "Fenster-Atlas");
 
             s_white = new Texture2D(1, 1);
@@ -73,7 +73,7 @@ namespace FF9Coop.Ui
                 if (font != null)
                     s_text.font = font;
             }
-            catch (Exception ex) { CoopLog.Error(ex, "Spielschrift nicht verfügbar"); }
+            catch (Exception ex) { CoopLog.Error(ex, "Game font not available"); }
         }
 
         // ---------------- Fenster ----------------

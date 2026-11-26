@@ -32,7 +32,7 @@ namespace FF9Coop.Ui
             MethodInfo filter = AccessTools.Method(typeof(BubbleUI), "FilterFlags");
             if (filter == null)
             {
-                CoopLog.Warning("BubbleUI.FilterFlags nicht gefunden – Original-Hand bleibt sichtbar");
+                CoopLog.Warning("BubbleUI.FilterFlags not found – original hand stays visible");
                 return;
             }
             harmony.Patch(filter, null, new HarmonyMethod(typeof(PlayerMarkers).GetMethod(nameof(FilterFlags_Postfix), BindingFlags.Static | BindingFlags.NonPublic)));
@@ -75,7 +75,7 @@ namespace FF9Coop.Ui
             if (rtpt != null)
                 s_project = (GteRtpt)Delegate.CreateDelegate(typeof(GteRtpt), rtpt);
             if (s_hereIconShow == null || s_project == null)
-                CoopLog.Warning($"Spieler-Hand: EIcon={(s_hereIconShow != null)} PSX={(s_project != null)} – teilweise inaktiv");
+                CoopLog.Warning($"Player hand: EIcon={(s_hereIconShow != null)} PSX={(s_project != null)} – partially disabled");
         }
 
         private static Boolean GameShowsHereIcon()
@@ -107,7 +107,7 @@ namespace FF9Coop.Ui
                 s_handLoaded = true;
                 s_hand = AssetManager.Load<Texture2D>("CommonAsset/EventIcons/cursor_hand_here", false);
                 if (s_hand == null)
-                    CoopLog.Warning("Hand-Grafik cursor_hand_here nicht gefunden – nutze Ersatz");
+                    CoopLog.Warning("Hand texture cursor_hand_here not found – using fallback");
             }
 
             Actor actor = leader.originalActor;

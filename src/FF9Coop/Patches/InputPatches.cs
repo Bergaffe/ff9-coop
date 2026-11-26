@@ -47,7 +47,7 @@ namespace FF9Coop.Patches
             }
             else
             {
-                CoopLog.Warning("UnityXInput.Input.GetXAxis nicht gefunden – Achsen-Filter inaktiv");
+                CoopLog.Warning("UnityXInput.Input.GetXAxis not found – axis filter disabled");
             }
 
             // 5) Vibration an das Pad des Spielers, der gerade dran ist (sonst immer Pad 1)
@@ -74,12 +74,12 @@ namespace FF9Coop.Patches
         {
             if (original == null)
             {
-                CoopLog.Warning($"Patch-Ziel für {prefixName} nicht gefunden – übersprungen (andere Memoria-Version?)");
+                CoopLog.Warning($"Patch target for {prefixName} not found – skipped (different Memoria version?)");
                 return;
             }
             String label = $"{original.DeclaringType?.Name}.{original.Name}";
             s_step?.Invoke("Patch " + label);
-            CoopLog.Message($"Patche {label} …");
+            CoopLog.Message($"Patching {label} …");
             harmony.Patch(original, new HarmonyMethod(typeof(InputPatches).GetMethod(prefixName, BindingFlags.Static | BindingFlags.NonPublic)), null);
             CoopLog.Message($"Patch OK: {label}");
         }

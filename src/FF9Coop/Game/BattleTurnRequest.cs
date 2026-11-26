@@ -26,7 +26,7 @@ namespace FF9Coop.Game
             s_switchPlayer = AccessTools.Method(typeof(BattleHUD), "SwitchPlayer", new[] { typeof(Int32) });
             s_unconscious = AccessTools.Field(typeof(BattleHUD), "_unconsciousStateList");
             if (s_switchPlayer == null)
-                CoopLog.Warning("BattleHUD.SwitchPlayer nicht gefunden – Zug-Anfordern deaktiviert");
+                CoopLog.Warning("BattleHUD.SwitchPlayer not found – turn request disabled");
         }
 
         /// <summary>Aus CoopBehaviour.Update; verarbeitet jede Pad-Abfrage genau einmal.</summary>
@@ -90,8 +90,8 @@ namespace FF9Coop.Game
                 queue.Insert(0, candidate);
 
                 s_switchPlayer.Invoke(hud, new Object[] { candidate });
-                CoopLog.Message($"P{player} übernimmt Zug (Slot {candidate})");
-                CoopBehaviour.Notify($"P{player} übernimmt den Zug");
+                CoopLog.Message($"P{player} takes the turn (slot {candidate})");
+                CoopBehaviour.Notify(Lang.T($"P{player} takes the turn", $"P{player} übernimmt den Zug"));
                 return true;
             }
             return false;

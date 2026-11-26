@@ -20,6 +20,8 @@ namespace FF9Coop
         public const Int32 MaxPads = 4;
 
         public Boolean Enabled = true;
+        /// <summary>Display language: Lang.Auto / Lang.English / Lang.German.</summary>
+        public Int32 Language = FF9Coop.Lang.Auto;
         public Int32 PlayerCount = 2;
         public Int32 LeaderPlayer = 1;
         public Int32 KeyboardPlayer = 1;
@@ -76,13 +78,14 @@ namespace FF9Coop
             CoopConfig cfg = new CoopConfig();
             if (!File.Exists(path))
             {
-                CoopLog.Warning($"Keine Konfiguration gefunden ({path}), nutze Standardwerte.");
+                CoopLog.Warning($"No configuration found ({path}), using defaults.");
                 return cfg;
             }
 
             Dictionary<String, Dictionary<String, String>> ini = ParseIni(File.ReadAllLines(path));
 
             cfg.Enabled = GetBool(ini, "Main", "Enabled", cfg.Enabled);
+            cfg.Language = FF9Coop.Lang.Parse(GetString(ini, "Main", "Language", "Auto"));
             cfg.PlayerCount = Clamp(GetInt(ini, "Players", "Count", cfg.PlayerCount), 1, MaxPlayers);
             cfg.LeaderPlayer = Clamp(GetInt(ini, "Players", "Leader", cfg.LeaderPlayer), 1, cfg.PlayerCount);
             cfg.KeyboardPlayer = Clamp(GetInt(ini, "Players", "Keyboard", cfg.KeyboardPlayer), 1, cfg.PlayerCount);
@@ -104,7 +107,7 @@ namespace FF9Coop
             if (!String.Equals(comp, "Auto", StringComparison.OrdinalIgnoreCase))
             {
                 try { cfg.CompanionCharacter = (CharacterId)Enum.Parse(typeof(CharacterId), comp, true); }
-                catch { CoopLog.Warning($"[Companion] Character: unbekannt '{comp}', nutze Auto"); }
+                catch { CoopLog.Warning($"[Companion] Character: unknown '{comp}', using Auto"); }
             }
             if (Single.TryParse(GetString(ini, "Companion", "Leash", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single leash))
                 cfg.CompanionLeash = Math.Max(200f, leash);
@@ -130,7 +133,7 @@ namespace FF9Coop
                         if (kv.Value.StartsWith("GEO_", StringComparison.OrdinalIgnoreCase))
                             Game.Companion.SetModel(id, kv.Value.ToUpperInvariant());
                     }
-                    catch { CoopLog.Warning($"[CompanionModels] Unbekannter Charakter '{kv.Key}'"); }
+                    catch { CoopLog.Warning($"[CompanionModels] Unknown character '{kv.Key}'"); }
                 }
             }
 
@@ -140,7 +143,7 @@ namespace FF9Coop
                 {
                     CharacterId id;
                     try { id = (CharacterId)Enum.Parse(typeof(CharacterId), kv.Key, true); }
-                    catch { CoopLog.Warning($"[Owners] Unbekannter Charakter '{kv.Key}'"); continue; }
+                    catch { CoopLog.Warning($"[Owners] Unknown character '{kv.Key}'"); continue; }
                     if (Int32.TryParse(kv.Value, out Int32 player) && player >= 1 && player <= cfg.PlayerCount)
                         cfg.Owners[id] = player;
                 }
@@ -179,6 +182,7 @@ namespace FF9Coop
         public void Save(String path)
         {
             List<String> lines = File.Exists(path) ? new List<String>(File.ReadAllLines(path)) : new List<String>();
+            Set(lines, "Main", "Language", FF9Coop.Lang.ToIni(Language));
             Set(lines, "Players", "Count", PlayerCount.ToString());
             Set(lines, "Players", "Leader", LeaderPlayer.ToString());
             Set(lines, "Players", "Keyboard", KeyboardPlayer.ToString());
@@ -245,9 +249,9 @@ namespace FF9Coop
 
         public override String ToString()
         {
-            return $"Spieler={PlayerCount} Leader=P{LeaderPlayer} Tastatur=P{KeyboardPlayer} " +
-                   $"Pads=[P{PadPlayer[0]},P{PadPlayer[1]},P{PadPlayer[2]},P{PadPlayer[3]}] Menüs={MenuControl} " +
-                   $"Zuweisungen={Owners.Count}";
+            return $"Players={PlayerCount} Leader=P{LeaderPlayer} Keyboard=P{KeyboardPlayer} " +
+                   $"Pads=[P{PadPlayer[0]},P{PadPlayer[1]},P{PadPlayer[2]},P{PadPlayer[3]}] Menus={MenuControl} Language={FF9Coop.Lang.ToIni(Language)} " +
+                   $"Assignments={Owners.Count}";
         }
 
         // ---- Mini-INI-Parser (Sektionen/Schlüssel case-insensitive, ';' und '#' sind Kommentare) ----
@@ -305,7 +309,7 @@ namespace FF9Coop
                 return SoloKeepLeader;
             if (v.Length == 2 && (v[0] == 'P' || v[0] == 'p') && Int32.TryParse(v.Substring(1), out Int32 p) && p >= 1 && p <= playerCount)
                 return p;
-            CoopLog.Warning($"[Control] SoloScenePrompt: unbekannter Wert '{v}', nutze Ask");
+            CoopLog.Warning($"[Control] SoloScenePrompt: unknown value '{v}', using Ask");
             return SoloAsk;
         }
 
@@ -315,7 +319,7 @@ namespace FF9Coop
             if (String.IsNullOrEmpty(v))
                 return def;
             try { return (KeyCode)Enum.Parse(typeof(KeyCode), v, true); }
-            catch { CoopLog.Warning($"[{sec}] {key}: unbekannte Taste '{v}', nutze {def}"); return def; }
+            catch { CoopLog.Warning($"[{sec}] {key}: unknown key '{v}', using {def}"); return def; }
         }
 
         private static Int32 Clamp(Int32 v, Int32 min, Int32 max) => v < min ? min : (v > max ? max : v);

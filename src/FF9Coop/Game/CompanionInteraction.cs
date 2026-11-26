@@ -49,7 +49,7 @@ namespace FF9Coop.Game
             if (TryInteract(events, map, cards ? TagCards : TagTalk))
             {
                 InteractionOwner.Begin(player);
-                CoopLog.Message($"P{player} interagiert als Begleiter ({(cards ? "Tetra Master" : "Ansprechen")})");
+                CoopLog.Message($"P{player} interacts as companion ({(cards ? "Tetra Master" : "talk")})");
             }
         }
 
@@ -60,7 +60,7 @@ namespace FF9Coop.Game
             s_isQuadTalkable = AccessTools.Method(typeof(EventCollision), "IsQuadTalkable");
             s_clearPath = AccessTools.Method(typeof(EventCollision), "ClearPathFinding");
             if (s_isNpcTalkable == null || s_isQuadTalkable == null)
-                CoopLog.Warning("EventCollision-Prüfungen nicht gefunden – Begleiter-Interaktion eingeschränkt");
+                CoopLog.Warning("EventCollision checks not found – companion interaction limited");
         }
 
         private static void ReadButtons(CoopConfig cfg, Int32 player, out Boolean talk, out Boolean cards)
@@ -180,7 +180,7 @@ namespace FF9Coop.Game
             s_player = player;
             s_state = State.Pending;
             s_since = Time.realtimeSinceStartup;
-            CoopBehaviour.Notify($"P{player} spricht");
+            CoopBehaviour.Notify(Lang.T($"P{player} is talking", $"P{player} spricht"));
         }
 
         public static void Update()

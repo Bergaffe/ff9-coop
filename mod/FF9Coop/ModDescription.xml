@@ -1,11 +1,12 @@
 <Mod>
 	<Name>FF9 Coop</Name>
-	<Version>0.8.0</Version>
+	<Version>0.9.0</Version>
 	<InstallationPath>FF9Coop</InstallationPath>
-	<Author>FF9Coop</Author>
+	<Author>Bergaffe</Author>
 	<MinimumMemoriaVersion>2025-07-13</MinimumMemoriaVersion>
-	<Description>Koop-Multiplayer: Charaktere werden Spielern zugewiesen, im Kampf steuert jeder Spieler nur seine eigenen Charaktere. Lokal mit mehreren Controllern oder online über Steam Remote Play Together / Parsec.
+	<Description>Co-op multiplayer (beta, 2-4 players): every party member belongs to a player and only that player controls it in battle. The second player walks around as a visible companion, can talk to NPCs, open chests, shop and play Tetra Master. Local with several controllers or online via Steam Remote Play Together / Parsec.
 
-Einstellungen: FF9Coop.ini im Mod-Ordner.</Description>
+In-game co-op menu: K or L3+R3. English and German.</Description>
 	<Category>Gameplay</Category>
+	<Website>https://github.com/Bergaffe/ff9-coop</Website>
 </Mod>

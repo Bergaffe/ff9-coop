@@ -57,7 +57,7 @@ namespace FF9Coop
             }
             catch (Exception ex)
             {
-                CoopLog.Error(ex, "Start fehlgeschlagen");
+                CoopLog.Error(ex, "Startup failed");
             }
         }
 
@@ -73,7 +73,7 @@ namespace FF9Coop
             String path = Path.Combine(ScriptsDirectory, name + ".dll");
             if (!File.Exists(path))
                 return null;
-            CoopLog.Message($"Lade Abhängigkeit {name} aus Mod-Ordner");
+            CoopLog.Message($"Loading dependency {name} from mod folder");
             return Assembly.LoadFile(path);
         }
     }

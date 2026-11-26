@@ -101,7 +101,7 @@ namespace FF9Coop.Input
                 }
                 catch (Exception ex)
                 {
-                    CoopLog.Error(ex, "Neutraler Pad-Zustand konnte nicht erzeugt werden");
+                    CoopLog.Error(ex, "Could not create a neutral pad state");
                     s_neutral = default(GamePadState); // nicht verbunden → Aufrufer nutzt Fallback
                 }
             }

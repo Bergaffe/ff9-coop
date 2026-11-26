@@ -103,7 +103,7 @@ namespace FF9Coop.Game
             catch (Exception ex)
             {
                 s_errors++;
-                CoopLog.Error(ex, $"Begleiter-Fehler ({s_errors}/3)" + (s_errors >= 3 ? " – Begleiter deaktiviert" : ""));
+                CoopLog.Error(ex, $"Companion error ({s_errors}/3)" + (s_errors >= 3 ? " – companion disabled" : ""));
                 Destroy();
             }
         }
@@ -250,7 +250,7 @@ namespace FF9Coop.Game
             GameObject go = ModelFactory.CreateModel(geo, false, true, Configuration.Graphics.ElementsSmoothTexture);
             if (go == null)
             {
-                CoopLog.Warning($"Begleiter-Modell {geo} nicht gefunden");
+                CoopLog.Warning($"Companion model {geo} not found");
                 return;
             }
             go.name = "FF9Coop_Companion";
@@ -283,7 +283,7 @@ namespace FF9Coop.Game
             ShownSince = Time.realtimeSinceStartup;
             PlaceBehindLeader(map);
             ForceNonCulling(map, go);
-            CoopLog.Message($"Begleiter {code} erscheint auf Karte {s_mapNo}");
+            CoopLog.Message($"Companion {code} appears on map {s_mapNo}");
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace FF9Coop.Game
             {
                 s_loggedMeshCheck = true;
                 Boolean onMesh = TryGetHeight(map.walkMesh, lp, lp.y, out Single meshY);
-                CoopLog.Message($"Laufgitter-Check: Leader y={lp.y:0}, Gitter y={(onMesh ? meshY.ToString("0") : "—")}");
+                CoopLog.Message($"Walkmesh check: leader y={lp.y:0}, mesh y={(onMesh ? meshY.ToString("0") : "—")}");
             }
         }
 

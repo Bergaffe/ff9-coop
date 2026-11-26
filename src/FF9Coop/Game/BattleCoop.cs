@@ -36,7 +36,7 @@ namespace FF9Coop.Game
             MethodInfo original = AccessTools.Method(typeof(BattleHUD), "IsNativeEnableAtb");
             if (original == null)
             {
-                CoopLog.Warning("BattleHUD.IsNativeEnableAtb nicht gefunden – ATB-Pause inaktiv");
+                CoopLog.Warning("BattleHUD.IsNativeEnableAtb not found – ATB pause disabled");
                 return;
             }
             harmony.Patch(original, null, new HarmonyMethod(typeof(BattleCoop).GetMethod(nameof(IsNativeEnableAtb_Postfix), BindingFlags.Static | BindingFlags.NonPublic)));
@@ -128,7 +128,7 @@ namespace FF9Coop.Game
                 if (s_partyDetail == null)
                 {
                     s_reflectionFailed = true;
-                    CoopLog.Warning("BattleHUD._partyDetail nicht gefunden – P1/P2-Markierung inaktiv");
+                    CoopLog.Warning("BattleHUD._partyDetail not found – player markers disabled");
                     return;
                 }
             }

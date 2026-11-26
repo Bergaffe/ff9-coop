@@ -34,11 +34,11 @@ namespace FF9Coop.Game
                     Int32 index = hud != null ? hud.CurrentPlayerIndex : -1;
                     if (index < 0)
                     {
-                        Description = "Kampf";
+                        Description = Lang.T("Battle", "Kampf");
                         return AllPlayers;
                     }
                     Int32 owner = BattleOwnership.GetOwner(index, out CharacterId character);
-                    Description = $"Kampf: {character}";
+                    Description = Lang.T("Battle: ", "Kampf: ") + character;
                     return Mask(owner);
                 }
 
@@ -46,15 +46,15 @@ namespace FF9Coop.Game
                     // Hat der Begleiter-Spieler ein Gespräch begonnen, bedient er Dialog und Auswahl
                     if (InteractionOwner.Player != 0)
                     {
-                        Description = $"Gespräch · P{InteractionOwner.Player}";
+                        Description = Lang.T("Conversation", "Gespräch") + $" · P{InteractionOwner.Player}";
                         return Mask(InteractionOwner.Player);
                     }
-                    Description = $"Feld · Leader P{cfg.LeaderPlayer}"
-                                  + (Companion.IsVisible ? $" · Begleiter {Companion.DisplayName(Companion.CharacterCode)} P{Companion.CompanionPlayer(cfg)}" : "");
+                    Description = Lang.T("Field", "Feld") + $" · Leader P{cfg.LeaderPlayer}"
+                                  + (Companion.IsVisible ? " · " + Lang.T("Companion", "Begleiter") + $" {Companion.DisplayName(Companion.CharacterCode)} P{Companion.CompanionPlayer(cfg)}" : "");
                     return Mask(cfg.LeaderPlayer);
                 case UIManager.UIState.WorldHUD:
-                    Description = $"Weltkarte · Leader P{cfg.LeaderPlayer}"
-                                  + (WorldCompanion.IsVisible ? $" · Begleiter {Companion.DisplayName(WorldCompanion.CharacterCode)} P{Companion.CompanionPlayer(cfg)}" : "");
+                    Description = Lang.T("World map", "Weltkarte") + $" · Leader P{cfg.LeaderPlayer}"
+                                  + (WorldCompanion.IsVisible ? " · " + Lang.T("Companion", "Begleiter") + $" {Companion.DisplayName(WorldCompanion.CharacterCode)} P{Companion.CompanionPlayer(cfg)}" : "");
                     return Mask(cfg.LeaderPlayer);
                 case UIManager.UIState.QuadMist:
                 case UIManager.UIState.QuadMistBattle:
@@ -72,7 +72,7 @@ namespace FF9Coop.Game
                 case UIManager.UIState.NameSetting:
                 case UIManager.UIState.PartySetting:
                 case UIManager.UIState.Chocograph:
-                    Description = InteractionOwner.Player != 0 ? $"Menü · P{InteractionOwner.Player}" : "Menü";
+                    Description = Lang.T("Menu", "Menü") + (InteractionOwner.Player != 0 ? $" · P{InteractionOwner.Player}" : "");
                     // Shop o. Ä. vom Begleiter-Spieler geöffnet → er darf auch bei MenuControl = Leader
                     if (cfg.MenuControl == MenuControlMode.Leader)
                         return Mask(cfg.LeaderPlayer) | (InteractionOwner.Player != 0 ? Mask(InteractionOwner.Player) : 0);

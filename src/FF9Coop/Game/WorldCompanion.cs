@@ -49,7 +49,7 @@ namespace FF9Coop.Game
             catch (Exception ex)
             {
                 s_errors++;
-                CoopLog.Error(ex, $"Weltkarten-Begleiter-Fehler ({s_errors}/3)" + (s_errors >= 3 ? " – deaktiviert" : ""));
+                CoopLog.Error(ex, $"World map companion error ({s_errors}/3)" + (s_errors >= 3 ? " – disabled" : ""));
                 Destroy();
             }
         }
@@ -122,7 +122,7 @@ namespace FF9Coop.Game
             GameObject model = ModelFactory.CreateModel(geo, false, true, Configuration.Graphics.WorldSmoothTexture);
             if (model == null)
             {
-                CoopLog.Warning($"Weltkarten-Begleiter-Modell {geo} nicht gefunden");
+                CoopLog.Warning($"World map companion model {geo} not found");
                 return;
             }
 
@@ -148,7 +148,7 @@ namespace FF9Coop.Game
             s_code = code;
             s_clip = null;
             PlaceBehind(leader);
-            CoopLog.Message($"Weltkarten-Begleiter {code} erscheint");
+            CoopLog.Message($"World map companion {code} appears");
         }
 
         private static void PlaceBehind(WMActor leader)

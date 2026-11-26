@@ -76,9 +76,9 @@ namespace FF9Coop.Ui
             {
                 cfg.LeaderPlayer = fixedPlayer;
                 InputRouter.ForceRelease();
-                CoopLog.Message($"Solo-Abschnitt: P{fixedPlayer} spielt {s_name} (feste Einstellung)");
+                CoopLog.Message($"Solo section: P{fixedPlayer} plays {s_name} (fixed setting)");
             }
-            CoopBehaviour.Notify($"P{cfg.LeaderPlayer} spielt {s_name}");
+            CoopBehaviour.Notify(Lang.T($"P{cfg.LeaderPlayer} plays {s_name}", $"P{cfg.LeaderPlayer} spielt {s_name}"));
         }
 
         private static void Open(String code)
@@ -90,7 +90,7 @@ namespace FF9Coop.Ui
             Time.timeScale = 0f;
             InputRouter.ForceRelease();
             FF9Sfx.FF9SFX_Play(103);
-            CoopLog.Message($"Solo-Abschnitt: Wer spielt {s_name}?");
+            CoopLog.Message($"Solo section: who plays {s_name}?");
         }
 
         private static void Close(Int32 newLeader)
@@ -102,9 +102,9 @@ namespace FF9Coop.Ui
             if (newLeader > 0 && newLeader != cfg.LeaderPlayer)
             {
                 cfg.LeaderPlayer = newLeader;
-                CoopLog.Message($"P{newLeader} spielt {s_name}");
+                CoopLog.Message($"P{newLeader} plays {s_name}");
             }
-            CoopBehaviour.Notify($"P{cfg.LeaderPlayer} spielt {s_name}");
+            CoopBehaviour.Notify(Lang.T($"P{cfg.LeaderPlayer} plays {s_name}", $"P{cfg.LeaderPlayer} spielt {s_name}"));
         }
 
         private static void HandleInput()
@@ -170,13 +170,13 @@ namespace FF9Coop.Ui
             Rect inner = Ff9Skin.Inset(win, 32f * s);
 
             Single line = 56f * s;
-            Ff9Skin.Label(new Rect(inner.x, inner.y, inner.width, line), $"Wer spielt {s_name}?", Ff9Skin.TextColor, 1.15f, TextAnchor.MiddleCenter);
+            Ff9Skin.Label(new Rect(inner.x, inner.y, inner.width, line), Lang.T($"Who plays {s_name}?", $"Wer spielt {s_name}?"), Ff9Skin.TextColor, 1.15f, TextAnchor.MiddleCenter);
             Ff9Skin.Label(new Rect(inner.x, inner.y + line * 1.2f, inner.width, line),
-                "Wer zuerst A drückt (Tastatur: Enter), übernimmt diesen Abschnitt.", Ff9Skin.TextColor, 0.8f, TextAnchor.MiddleCenter);
+                Lang.T("Whoever presses A first (keyboard: Enter) takes over this section.", "Wer zuerst A drückt (Tastatur: Enter), übernimmt diesen Abschnitt."), Ff9Skin.TextColor, 0.8f, TextAnchor.MiddleCenter);
 
             Single remaining = Mathf.Max(0f, TimeoutSeconds - (Time.realtimeSinceStartup - s_openedAt));
             Ff9Skin.Label(new Rect(inner.x, inner.y + line * 2.3f, inner.width, line),
-                $"B / Esc: weiter mit P{cfg.LeaderPlayer}   ({remaining:0} s)", Ff9Skin.DimColor, 0.75f, TextAnchor.MiddleCenter);
+                Lang.T($"B / Esc: continue with P{cfg.LeaderPlayer}   ({remaining:0} s)", $"B / Esc: weiter mit P{cfg.LeaderPlayer}   ({remaining:0} s)"), Ff9Skin.DimColor, 0.75f, TextAnchor.MiddleCenter);
         }
 
         private static String NameForCode(String code)

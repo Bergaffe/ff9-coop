@@ -47,7 +47,7 @@ namespace FF9Coop.Game
                     cfg.LeaderPlayer = player;
                     s_needsRelease[player] = true;
                     CoopLog.Message($"Leader: P{old} -> P{player}");
-                    CoopBehaviour.Notify($"P{player} ist jetzt Leader");
+                    CoopBehaviour.Notify(Lang.T($"P{player} is now the leader", $"P{player} ist jetzt Leader"));
                 }
             }
         }

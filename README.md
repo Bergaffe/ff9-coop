@@ -1,80 +1,84 @@
 # FF9 Coop
 
-Koop-Multiplayer-Mod für **Final Fantasy IX (Steam)** auf Basis von [Memoria](https://github.com/Albeoris/Memoria). Kompatibel mit Moguri Mod.
+Co-op multiplayer mod for **Final Fantasy IX (Steam)**, built on [Memoria](https://github.com/Albeoris/Memoria). Compatible with Moguri Mod.
 
-## Steuerung
-| Aktion | Controller | Tastatur |
+**[Deutsche Version](README.de.md)**
+
+Play the story together: every party member belongs to a player, the second player walks around as a visible companion, and everything can be assigned in an in-game menu. Play locally with several controllers or online via Steam Remote Play Together / Parsec. Only the host needs the game and the mods.
+
+## Controls
+| Action | Controller | Keyboard |
 |---|---|---|
-| Zug anfordern (Kampf, eigener Charakter ist bereit) | **Y** / Dreieck | **T** |
-| Leader übernehmen (Feld/Weltkarte ohne Cutscene, nur der Nicht-Leader) | **Back/Select 1 s halten** | **L 1 s halten** |
-| Begleiter: NPC ansprechen, Truhe/Schild/Auslöser benutzen, Shop | **A** | Bestätigen-Taste des Spiels |
-| Begleiter: Tetra Master herausfordern | **X** (Quadrat) | Spezial-Taste des Spiels |
-| Koop-Menü öffnen/schließen (alle Zuweisungen; das Spiel pausiert) | **L3 + R3** (beide Sticks drücken) | **K** |
+| Turn request (battle, one of your characters is ready) | **Y** / Triangle | **T** |
+| Take over as leader (field/world map outside cutscenes, non-leader only) | **hold Back/Select 1 s** | **hold L 1 s** |
+| Companion: talk to NPC, use chest/sign/trigger, shop | **A** | the game's confirm key |
+| Companion: challenge to Tetra Master | **X** (Square) | the game's special key |
+| Open/close co-op menu (all assignments; the game pauses) | **L3 + R3** (press both sticks) | **K** |
 
-Im Koop-Menü stellst du ein:
-- Spieleranzahl, Leader und wer Menüs bedienen darf
-- welcher Spieler die Tastatur und welcher jeden Controller benutzt. Ein ● zeigt, welcher Controller gerade gedrückt wird.
-- welcher Spieler im Kampf welchen Charakter steuert
-- den Begleiter in Städten: an/aus und welcher Charakter
+In the co-op menu you set:
+- language (Auto follows the game language, English, Deutsch)
+- number of players, leader and who may use menus
+- what happens in solo story sections (ask, keep leader, fixed player)
+- which player uses the keyboard and each controller. A ● shows which controller is currently being pressed.
+- which player controls which character in battle, plus battle options (ATB pause, ready vibration, P1/P2 markers)
+- the companion: on/off, world map, which character, coloured player hands
 
-Änderungen wirken sofort. „Speichern und schließen“ schreibt sie in die `FF9Coop.ini`, „Abbrechen“ (B/Esc) verwirft sie.
+Changes take effect immediately. "Save and close" writes them to `FF9Coop.ini`, "Cancel" (B/Esc) discards them.
 
-Tasten und Haltedauer lassen sich in `FF9Coop.ini` ändern (`TurnRequestKey`, `LeaderKey`, `LeaderHoldSeconds`).
+Keys and hold duration can be changed in `FF9Coop.ini` (`TurnRequestKey`, `LeaderKey`, `LeaderHoldSeconds`, `MenuKey`).
 
-## Installation (Release)
-1. [Memoria](https://github.com/Albeoris/Memoria) bzw. Moguri Mod installieren.
-2. `FF9Coop-x.y.z.zip` aus den [Releases](../../releases) in den FF9-Spielordner entpacken (es entsteht der Ordner `FF9Coop`).
-3. Im Memoria-Launcher unter Mods „FF9 Coop“ aktivieren, oder in `Memoria.ini` unter `[Mod]` `FF9Coop` bei `FolderNames` vorne eintragen.
+## Installation
+1. Install [Memoria](https://github.com/Albeoris/Memoria) (or Moguri Mod, which includes it).
+2. Extract `FF9Coop-x.y.z.zip` from the [releases](../../releases) into the FF9 game folder (this creates the folder `FF9Coop`).
+3. Enable "FF9 Coop" in the Memoria launcher's mod manager, or add `FF9Coop` to the front of `FolderNames` under `[Mod]` in `Memoria.ini`.
 
-## Stand: v0.8.0 (Beta)
-- **v0.8.0:** Farbige „Ich bin hier“-Hand mit Spielernummer über jeder Figur (Menü: Spieler-Hand)
+## Changelog (beta)
+- **v0.9.0:** English translation, German as second language (menu option "Language / Sprache")
+- **v0.8.0:** Coloured "I'm here" hand with player number above every character (menu: Player hand)
 - **v0.7.0:**
-  - Begleiter kollidiert mit NPCs
-  - Begleiter versinkt auf der Weltkarte in Wald und Wasser
-  - Solo-Abschnitte als feste Menüoption
-  - Kampf: ATB-Pause bei Befehlswahl, Bereit-Signal, P1/P2-Markierung
-  - weitere Charaktere als Begleiter wählbar
+  - Companion collides with NPCs
+  - Companion sinks into forests and water on the world map
+  - Solo sections as a fixed menu option
+  - Battle: ATB pause while choosing, ready signal, P1/P2 markers
+  - More characters selectable as companion
 - **v0.6.0:**
-  - Begleiter auf der Weltkarte (nur zu Fuß)
-  - „Wer spielt …?“-Fenster in Solo-Abschnitten
-  - Vibration geht an den Controller des aktiven Spielers
-- **v0.5.0:** Der Begleiter spricht NPCs an, öffnet Truhen, handelt und spielt Tetra Master. Wer ein Gespräch beginnt, bedient es auch.
-- **v0.4.0:** Koop-Menü im FF9-Stil (K / L3+R3)
-- **v0.3.0:** Sichtbare Begleiter-Figur im Feld
-- **v0.2.0:** Leader-Wechsel, „Zug anfordern“ per Tastatur, HUD-Einblendungen
-- **v0.1.0:** Getrennte Controller, Kampf-Koop (Kommandomenü nur für den Besitzer des Charakters), „Zug anfordern“, Status-HUD
+  - Companion on the world map (on foot only)
+  - "Who plays …?" window in solo sections
+  - Vibration goes to the active player's controller
+- **v0.5.0:** The companion talks to NPCs, opens chests, shops and plays Tetra Master. Whoever starts a conversation also controls it.
+- **v0.4.0:** Co-op menu in FF9 style (K / L3+R3)
+- **v0.3.0:** Visible companion character in the field
+- **v0.2.0:** Leader swap, turn request via keyboard, HUD notifications
+- **v0.1.0:** Separate controllers, battle co-op (command menu only for the character's owner), turn request, status HUD
 
-## Bauen & installieren
-Voraussetzungen: .NET SDK (getestet mit 9.0), FF9 Steam mit Memoria (≥ 2025-07-13).
+## Is the mod running?
+- `Co-op · P1` appears in the top left corner.
+- `Memoria.log` in the game folder contains lines with `[FF9Coop]`, including `Initialization complete`. Errors are logged there too.
+- If only one controller is connected, it may also control the other players' characters.
+
+## Troubleshooting
+- **The game doesn't start, Windows reports that an application control policy blocked the file:** Windows Smart App Control blocks the unsigned Memoria launcher. The only fix is to turn Smart App Control off (Windows Security → App & browser control).
+- **The mod is inactive and the log says "The last start crashed while patching":** delete `FF9Coop\FF9Coop.patching` in the game folder and restart.
+- **After a Memoria update:** check for a new version of this mod.
+
+## Known limitations
+- Memoria merges PlayStation and Switch controllers (via JoyShockLibrary) into every XInput slot, so they can't be assigned to a single player yet. Xbox controllers and the virtual pads of Steam Remote Play Together work.
+- While the keyboard is blocked, Memoria hotkeys on it are blocked too (`GateKeyboard = 0` disables the block).
+
+## Building from source
+Requirements: .NET SDK (tested with 9.0), FF9 Steam with Memoria (≥ 2025-07-13).
 
 ```powershell
 dotnet build -c Release src\FF9Coop
-powershell -ExecutionPolicy Bypass -File tools\install.ps1          # installieren / aktualisieren
+powershell -ExecutionPolicy Bypass -File tools\install.ps1          # install / update
 powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Uninstall
 ```
 
-Liegt das Spiel woanders, gibst du beim Build `-p:GameDir="…"` und beim Install-Skript `-GameDir "…"` mit.
+If the game is installed elsewhere, pass `-p:GameDir="…"` to the build and `-GameDir "…"` to the install script.
 
-Das Install-Skript macht drei Dinge:
-- Es kopiert `mod\FF9Coop` ins Spielverzeichnis.
-- Es trägt `FF9Coop` in `Memoria.ini` unter `FolderNames`/`Priorities` ein.
-- Beim ersten Lauf legt es ein Backup als `Memoria.ini.ff9coop.bak` an.
+The install script copies `mod\FF9Coop` into the game folder and adds `FF9Coop` to `FolderNames`/`Priorities` in `Memoria.ini` (backup on first run: `Memoria.ini.ff9coop.bak`). An existing `FF9Coop.ini` in the game is not overwritten.
 
-Eine vorhandene `FF9Coop.ini` im Spiel wird bei Updates nicht überschrieben.
+The mod uses Harmony 1.2, because Harmony 2.x crashes under the game's Unity 5.2 Mono.
 
-## Läuft die Mod?
-- Oben links erscheint `Koop · P1`.
-- In `Memoria.log` im Spielordner stehen Zeilen mit `[FF9Coop]`, darunter `Initialisierung abgeschlossen`. Fehler stehen dort ebenfalls.
-- Ist nur ein Controller angeschlossen, darf dieser auch die Charaktere der anderen Spieler steuern.
-
-## Fehlerbehebung
-- **Das Spiel startet nicht, Steam meldet „Anwendungssteuerungsrichtlinie hat diese Datei blockiert“:** Windows Smart App Control blockiert den nicht signierten Memoria-Launcher. Abhilfe schafft nur, Smart App Control abzuschalten (Windows-Sicherheit → App- & Browsersteuerung).
-- **Die Mod ist inaktiv, und im Log steht „Letzter Start ist beim Patchen abgestürzt“:** Lösch `FF9Coop\FF9Coop.patching` im Spielordner und starte neu.
-- **Nach einem Memoria-Update:** Neu bauen und installieren. Wir verwenden Harmony 1.2, weil Harmony 2.x unter Unity 5.2 abstürzt.
-
-## Bekannte Einschränkungen
-- PlayStation- und Switch-Controller (über JoyShockLibrary) mischt Memoria in jeden XInput-Slot. Sie lassen sich noch nicht einem einzelnen Spieler zuordnen. Xbox-Controller und die virtuellen Pads von Steam Remote Play Together funktionieren.
-- Ist die Tastatur gesperrt, gelten auch Memoria-Hotkeys darüber als gesperrt (`GateKeyboard = 0` schaltet die Sperre ab).
-
-## Für Entwickler
-[Konzept](docs/design.md) · [Technische Notizen](docs/technik.md)
+## For developers
+[Concept](docs/design.md) · [Technical notes](docs/technical-notes.md)
