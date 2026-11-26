@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    FF9 Coop – Memoria-Mod-DLL.
+    Memoria lädt pro Mod-Ordner "<Ordner>/StreamingAssets/Scripts/Memoria.Scripts.<Ordner>.dll"
+    (siehe external/Memoria/Assembly-CSharp/Memoria/Scripts/ScriptsLoader.cs). Der Assembly-Name muss
+    deshalb exakt "Memoria.Scripts.FF9Coop" lauten.
+
+    Spielpfad überschreibbar: dotnet build -p:GameDir="D:\...\FINAL FANTASY IX"
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net35</TargetFramework>
+    <AssemblyName>Memoria.Scripts.FF9Coop</AssemblyName>
+    <RootNamespace>FF9Coop</RootNamespace>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <NoStdLib>true</NoStdLib>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DebugType>portable</DebugType>
+    <!-- Versionskonflikte mscorlib 2.0.0.0 (Harmony) vs. 2.0.5.0 (Unity) sind zur Laufzeit egal -->
+    <NoWarn>$(NoWarn);CS1701;CS1702;MSB3277</NoWarn>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\FINAL FANTASY IX</GameDir>
+    <Managed>$(GameDir)\x64\FF9_Data\Managed</Managed>
+    <ModOut>$(MSBuildThisFileDirectory)..\..\mod\FF9Coop\StreamingAssets\Scripts\</ModOut>
+    <!-- Wie Memoria.Scripts: gegen die Unity-Mono-Bibliotheken des Spiels kompilieren -->
+    <FrameworkPathOverride>$(Managed)</FrameworkPathOverride>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Harmony 1.2: Harmony 2.x (MonoMod.Core) crasht in Unitys Mono 5.2 (AV in mono.dll+0xe1f95) -->
+    <PackageReference Include="Lib.Harmony" Version="1.2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="mscorlib"><HintPath>$(Managed)\mscorlib.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="System"><HintPath>$(Managed)\System.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="System.Core"><HintPath>$(Managed)\System.Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(Managed)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(Managed)\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Memoria.Prime"><HintPath>$(Managed)\Memoria.Prime.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="XInputDotNetPure"><HintPath>$(Managed)\XInputDotNetPure.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <!-- Nach dem Build: DLL + 0Harmony.dll in den Mod-Ordner kopieren -->
+  <Target Name="CopyToModFolder" AfterTargets="Build">
+    <ItemGroup>
+      <ModFiles Include="$(TargetDir)Memoria.Scripts.FF9Coop.dll;$(TargetDir)Memoria.Scripts.FF9Coop.pdb;$(TargetDir)0Harmony.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ModFiles)" DestinationFolder="$(ModOut)" SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="FF9Coop -> $(ModOut)" />
+  </Target>
+
+</Project>

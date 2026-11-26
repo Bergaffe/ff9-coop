@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+*.user
+external/
+mod/FF9Coop/StreamingAssets/Scripts/*.dll
+mod/FF9Coop/StreamingAssets/Scripts/*.pdb
