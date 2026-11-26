@@ -241,7 +241,33 @@ namespace FF9Coop.Game
             s_code = code;
             s_currentClip = null;
             PlaceBehindLeader(map);
+            ForceNonCulling(map, go);
             CoopLog.Message($"Begleiter {code} erscheint auf Karte {s_mapNo}");
+        }
+
+        /// <summary>
+        /// Nachbau von FieldMapActor.ForcedNonCullingMesh: Der Feld-Shader projiziert selbst (PSX-GTE),
+        /// deshalb passen Unitys Bounds nicht zur Bildposition. Ohne riesige Bounds blendet das
+        /// Frustum-Culling Modellteile (z. B. den Kopf) oder die ganze Figur fälschlich aus.
+        /// </summary>
+        private static void ForceNonCulling(FieldMap map, GameObject go)
+        {
+            Vector3 center = Vector3.zero;
+            Camera cam = map.GetMainCamera();
+            if (cam != null)
+            {
+                Single mid = (cam.farClipPlane - cam.nearClipPlane) / 2f + cam.nearClipPlane;
+                center = go.transform.InverseTransformPoint(cam.transform.position + cam.transform.forward.normalized * mid);
+            }
+            Bounds huge = new Bounds(center, Vector3.one * Single.MaxValue * 0.01f);
+            foreach (SkinnedMeshRenderer smr in go.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                smr.updateWhenOffscreen = false; // sonst würde Unity die Bounds neu berechnen
+                smr.localBounds = huge;
+            }
+            foreach (MeshFilter mf in go.GetComponentsInChildren<MeshFilter>(true))
+                if (mf.sharedMesh != null)
+                    mf.sharedMesh.bounds = huge;
         }
 
         private static void Hide()
