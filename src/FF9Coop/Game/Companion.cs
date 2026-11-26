@@ -113,6 +113,16 @@ namespace FF9Coop.Game
             UIManager ui = PersistenSingleton<UIManager>.Instance;
             EventEngine events = PersistenSingleton<EventEngine>.Instance;
             FieldMap map = events != null ? events.fieldmap : null;
+            // The companion started this conversation/shop itself: stay visible and stand still in front
+            // of the NPC until the game hands control back (otherwise it would vanish while talking).
+            if (InteractionOwner.Player != 0 && IsVisible && map != null && s_map == map
+                && FF9StateSystem.Common.FF9.fldMapNo == s_mapNo
+                && ui != null && ui.State != UIManager.UIState.BattleHUD)
+            {
+                PlayClip("IDLE");
+                return;
+            }
+
             Boolean inField = ui != null && ui.State == UIManager.UIState.FieldHUD && map != null
                               && map.playerController != null && map.walkMesh != null;
 
