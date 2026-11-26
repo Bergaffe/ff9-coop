@@ -37,6 +37,14 @@ namespace FF9Coop
         public KeyCode LeaderKey = KeyCode.L;
         public Single LeaderHoldSeconds = 1f;
 
+        /// <summary>Sichtbare Begleiter-Figur im Feld für den Nicht-Leader.</summary>
+        public Boolean CompanionEnabled = true;
+        /// <summary>Bevorzugter Begleiter; NONE = automatisch (erstes Party-Mitglied außer dem Leader).</summary>
+        public CharacterId CompanionCharacter = CharacterId.NONE;
+        /// <summary>Maximaler Abstand zum Leader, danach wird der Begleiter zurückgeholt (Feld-Einheiten).</summary>
+        public Single CompanionLeash = 2000f;
+        public KeyCode CompanionRunKey = KeyCode.LeftShift;
+
         /// <summary>Charakter → Spieler (1–4); 0 oder fehlend = automatisch nach Kampf-Slot.</summary>
         public readonly Dictionary<CharacterId, Int32> Owners = new Dictionary<CharacterId, Int32>();
 
@@ -67,6 +75,17 @@ namespace FF9Coop
             cfg.LeaderKey = GetKey(ini, "Control", "LeaderKey", cfg.LeaderKey);
             if (Single.TryParse(GetString(ini, "Control", "LeaderHoldSeconds", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single hold))
                 cfg.LeaderHoldSeconds = Math.Max(0f, hold);
+
+            cfg.CompanionEnabled = GetBool(ini, "Companion", "Enabled", cfg.CompanionEnabled);
+            String comp = GetString(ini, "Companion", "Character", "Auto");
+            if (!String.Equals(comp, "Auto", StringComparison.OrdinalIgnoreCase))
+            {
+                try { cfg.CompanionCharacter = (CharacterId)Enum.Parse(typeof(CharacterId), comp, true); }
+                catch { CoopLog.Warning($"[Companion] Character: unbekannt '{comp}', nutze Auto"); }
+            }
+            if (Single.TryParse(GetString(ini, "Companion", "Leash", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single leash))
+                cfg.CompanionLeash = Math.Max(200f, leash);
+            cfg.CompanionRunKey = GetKey(ini, "Companion", "RunKey", cfg.CompanionRunKey);
 
             if (ini.TryGetValue("owners", out Dictionary<String, String> owners))
             {

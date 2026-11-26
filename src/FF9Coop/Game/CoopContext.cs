@@ -43,7 +43,8 @@ namespace FF9Coop.Game
                 }
 
                 case UIManager.UIState.FieldHUD:
-                    Description = $"Feld · Leader P{cfg.LeaderPlayer}";
+                    Description = $"Feld · Leader P{cfg.LeaderPlayer}"
+                                  + (Companion.IsVisible ? $" · Begleiter {Companion.CharacterCode} P{Companion.CompanionPlayer(cfg)}" : "");
                     return Mask(cfg.LeaderPlayer);
                 case UIManager.UIState.WorldHUD:
                     Description = $"Weltkarte · Leader P{cfg.LeaderPlayer}";
