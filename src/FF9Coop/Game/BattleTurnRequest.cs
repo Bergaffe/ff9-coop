@@ -63,6 +63,11 @@ namespace FF9Coop.Game
                 if (TrySwitchTo(hud, player, current))
                     return;
             }
+
+            // Tastatur: direkt über UnityEngine.Input lesen, denn unser Patch sperrt UnityXInput.Input für die Tastatur,
+            // solange ihr Spieler nicht dran ist. Genau dann soll die Taste aber wirken.
+            if (cfg.KeyboardPlayer != currentOwner && UnityEngine.Input.GetKeyDown(cfg.TurnRequestKey))
+                TrySwitchTo(hud, cfg.KeyboardPlayer, current);
         }
 
         private static Boolean TrySwitchTo(BattleHUD hud, Int32 player, Int32 current)
@@ -86,6 +91,7 @@ namespace FF9Coop.Game
 
                 s_switchPlayer.Invoke(hud, new Object[] { candidate });
                 CoopLog.Message($"P{player} übernimmt Zug (Slot {candidate})");
+                CoopBehaviour.Notify($"P{player} übernimmt den Zug");
                 return true;
             }
             return false;

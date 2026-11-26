@@ -43,10 +43,10 @@ namespace FF9Coop.Game
                 }
 
                 case UIManager.UIState.FieldHUD:
-                    Description = "Feld";
+                    Description = $"Feld · Leader P{cfg.LeaderPlayer}";
                     return Mask(cfg.LeaderPlayer);
                 case UIManager.UIState.WorldHUD:
-                    Description = "Weltkarte";
+                    Description = $"Weltkarte · Leader P{cfg.LeaderPlayer}";
                     return Mask(cfg.LeaderPlayer);
                 case UIManager.UIState.QuadMist:
                 case UIManager.UIState.QuadMistBattle:

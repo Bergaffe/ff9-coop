@@ -8,7 +8,7 @@ namespace FF9Coop
 {
     internal static class CoopMod
     {
-        public const String Version = "0.1.0";
+        public const String Version = "0.2.0";
 
         public static CoopConfig Config { get; private set; } = new CoopConfig();
 

@@ -5,7 +5,21 @@ Koop-Multiplayer-Mod für **Final Fantasy IX (Steam)** auf Basis von [Memoria](h
 - Planung: [docs/design.md](docs/design.md)
 - Technische Analyse: [docs/phase0-spike.md](docs/phase0-spike.md)
 
-## Stand: Phase 1 (v0.1.0)
+## Steuerung
+| Aktion | Controller | Tastatur |
+|---|---|---|
+| Zug anfordern (Kampf, eigener Charakter ist bereit) | **Y** / Dreieck | **T** |
+| Leader übernehmen (Feld/Weltkarte ohne Cutscene, nur der Nicht-Leader) | **Back/Select 1 s halten** | **L 1 s halten** |
+
+Tasten und Haltedauer lassen sich in `FF9Coop.ini` ändern (`TurnRequestKey`, `LeaderKey`, `LeaderHoldSeconds`).
+
+## Stand: v0.2.0
+Neu in Phase 2 (in Arbeit):
+- „Zug anfordern“ geht jetzt auch mit der Tastatur.
+- Der Leader lässt sich im Spiel wechseln.
+- Das HUD zeigt Einblendungen und beim Halten einen Fortschrittsbalken.
+
+### Phase 1 (v0.1.0)
 - Mehrere XInput-Controller werden getrennt ausgewertet. Das Spiel sieht immer nur die Eingaben der Spieler, die gerade dran sind.
 - **Kampf:** Das Kommandomenü eines Charakters reagiert nur auf den Controller seines Besitzers (`[Owners]` in `FF9Coop.ini`).
 - **Zug anfordern:** Ist ein eigener Charakter bereit, holt der wartende Spieler ihn mit **Y/Dreieck**. Das geht nur, wenn das Hauptkommando-Menü offen ist.

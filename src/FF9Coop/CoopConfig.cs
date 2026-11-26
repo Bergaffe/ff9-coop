@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using Memoria.Data;
+using UnityEngine;
 
 namespace FF9Coop
 {
@@ -29,6 +31,12 @@ namespace FF9Coop
         public Boolean GateKeyboard = true;
         public Boolean ShowHud = true;
 
+        /// <summary>Tastatur-Taste für "Zug anfordern" im Kampf (Pad: Y).</summary>
+        public KeyCode TurnRequestKey = KeyCode.T;
+        /// <summary>Tastatur-Taste zum Übernehmen der Leader-Rolle, gehalten (Pad: Back/Select gehalten).</summary>
+        public KeyCode LeaderKey = KeyCode.L;
+        public Single LeaderHoldSeconds = 1f;
+
         /// <summary>Charakter → Spieler (1–4); 0 oder fehlend = automatisch nach Kampf-Slot.</summary>
         public readonly Dictionary<CharacterId, Int32> Owners = new Dictionary<CharacterId, Int32>();
 
@@ -55,6 +63,10 @@ namespace FF9Coop
             cfg.BattleTurnRequest = GetBool(ini, "Control", "BattleTurnRequest", cfg.BattleTurnRequest);
             cfg.GateKeyboard = GetBool(ini, "Control", "GateKeyboard", cfg.GateKeyboard);
             cfg.ShowHud = GetBool(ini, "Control", "ShowHud", cfg.ShowHud);
+            cfg.TurnRequestKey = GetKey(ini, "Control", "TurnRequestKey", cfg.TurnRequestKey);
+            cfg.LeaderKey = GetKey(ini, "Control", "LeaderKey", cfg.LeaderKey);
+            if (Single.TryParse(GetString(ini, "Control", "LeaderHoldSeconds", null), NumberStyles.Float, CultureInfo.InvariantCulture, out Single hold))
+                cfg.LeaderHoldSeconds = Math.Max(0f, hold);
 
             if (ini.TryGetValue("owners", out Dictionary<String, String> owners))
             {
@@ -121,6 +133,15 @@ namespace FF9Coop
             String v = GetString(ini, sec, key, null);
             if (v == null) return def;
             return v == "1" || v.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static KeyCode GetKey(Dictionary<String, Dictionary<String, String>> ini, String sec, String key, KeyCode def)
+        {
+            String v = GetString(ini, sec, key, null);
+            if (String.IsNullOrEmpty(v))
+                return def;
+            try { return (KeyCode)Enum.Parse(typeof(KeyCode), v, true); }
+            catch { CoopLog.Warning($"[{sec}] {key}: unbekannte Taste '{v}', nutze {def}"); return def; }
         }
 
         private static Int32 Clamp(Int32 v, Int32 min, Int32 max) => v < min ? min : (v > max ? max : v);
