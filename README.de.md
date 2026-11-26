@@ -1,8 +1,12 @@
-# FF9 Coop
+<p align="center">
+  <img src="Nexusmod_Upload/ffix_multiplay_title.png" alt="Final Fantasy IX Multiplayer Mod" width="720">
+</p>
 
-Koop-Multiplayer-Mod für **Final Fantasy IX (Steam)** auf Basis von [Memoria](https://github.com/Albeoris/Memoria). Kompatibel mit Moguri Mod.
+<h1 align="center">FF9 Coop</h1>
 
-**[English version](README.md)**
+<p align="center">Koop-Multiplayer-Mod für <b>Final Fantasy IX (Steam)</b> auf Basis von <a href="https://github.com/Albeoris/Memoria">Memoria</a>. Kompatibel mit Moguri Mod.</p>
+
+<p align="center"><a href="README.md">English version</a></p>
 
 Erlebt die Story gemeinsam: Jeder Party-Charakter gehört einem Spieler, der zweite Spieler läuft als sichtbarer Begleiter mit, und alles lässt sich in einem Menü im Spiel zuweisen. Gespielt wird lokal mit mehreren Controllern oder online über Steam Remote Play Together bzw. Parsec. Nur der Host braucht das Spiel und die Mods.
 
