@@ -14,7 +14,7 @@ Erlebt die Story gemeinsam: Jeder Party-Charakter gehört einem Spieler, der zwe
 | Aktion | Controller | Tastatur |
 |---|---|---|
 | Zug anfordern (Kampf, eigener Charakter ist bereit) | **Y** / Dreieck | **T** |
-| Leader übernehmen (Feld/Weltkarte ohne Cutscene, nur der Nicht-Leader) | **Back/Select 1 s halten** | **L 1 s halten** |
+| Leader übernehmen (Feld/Weltkarte ohne Cutscene, nur der Nicht-Leader) | **Back/Select oder L2 + R2 1 s halten** | **L 1 s halten** |
 | Begleiter: NPC ansprechen, Truhe/Schild/Auslöser benutzen, Shop | **A** | Bestätigen-Taste des Spiels |
 | Begleiter auf der Weltkarte: Ort betreten (Plätze tauschen, du wirst Leader) | **A** auf dem Ort | Bestätigen-Taste des Spiels |
 | Begleiter: Tetra Master herausfordern | **X** (Quadrat) | Spezial-Taste des Spiels |

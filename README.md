@@ -14,7 +14,7 @@ Play the story together: every party member belongs to a player, the second play
 | Action | Controller | Keyboard |
 |---|---|---|
 | Turn request (battle, one of your characters is ready) | **Y** / Triangle | **T** |
-| Take over as leader (field/world map outside cutscenes, non-leader only) | **hold Back/Select 1 s** | **hold L 1 s** |
+| Take over as leader (field/world map outside cutscenes, non-leader only) | **hold Back/Select or L2 + R2 for 1 s** | **hold L 1 s** |
 | Companion: talk to NPC, use chest/sign/trigger, shop | **A** | the game's confirm key |
 | Companion on the world map: enter a town/dungeon (swaps places, you become leader) | **A** on the location | the game's confirm key |
 | Companion: challenge to Tetra Master | **X** (Square) | the game's special key |

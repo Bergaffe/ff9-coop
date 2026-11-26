@@ -88,8 +88,14 @@ namespace FF9Coop.Game
             if (cfg.KeyboardPlayer == player && UnityEngine.Input.GetKey(cfg.LeaderKey))
                 return true;
             for (Int32 pad = 0; pad < PadInput.PadCount; pad++)
-                if (cfg.PadPlayer[pad] == player && PadInput.IsConnected(pad) && PadInput.Current(pad).Buttons.Back == ButtonState.Pressed)
+            {
+                if (cfg.PadPlayer[pad] != player || !PadInput.IsConnected(pad))
+                    continue;
+                GamePadState s = PadInput.Current(pad);
+                // Back/Select, or L2 + R2 together (DualShock/DualSense: Share/Create is often not mapped to Back)
+                if (s.Buttons.Back == ButtonState.Pressed || (s.Triggers.Left > 0.5f && s.Triggers.Right > 0.5f))
                     return true;
+            }
             return false;
         }
     }
