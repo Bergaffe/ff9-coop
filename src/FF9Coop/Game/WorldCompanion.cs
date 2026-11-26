@@ -96,7 +96,57 @@ namespace FF9Coop.Game
             }
 
             Move(cfg, world, leader);
+            TryEnterLocation(cfg, leader);
         }
+
+        /// <summary>
+        /// Towns and dungeons on the world map are entered from the leader's ground tile only
+        /// (ff9.w_movementUpdate → WorldEvent for tiles with an event ID). If the companion player presses
+        /// A on such a tile, leader and companion swap places and the companion player becomes the leader,
+        /// so the game offers the entry to them as usual.
+        /// </summary>
+        private static void TryEnterLocation(CoopConfig cfg, WMActor leader)
+        {
+            if (s_groundId < 0 || ff9.m_GetIDEvent(s_groundId) == 0 || !ff9.w_frameEventEnable)
+                return;
+            Int32 player = Companion.CompanionPlayer(cfg);
+            if (player == 0)
+                return;
+            CompanionInteraction.ReadButtons(cfg, player, out Boolean confirm, out _);
+            if (!confirm)
+                return;
+
+            Actor actor = leader.originalActor;
+            if (actor == null || ff9.w_moveCHRStatus == null || actor.index >= ff9.w_moveCHRStatus.Length)
+                return;
+
+            Vector3 companionPos = s_holder.transform.position;
+            Single companionYaw = s_yaw;
+            Vector3 leaderPos = leader.pos;
+            Single leaderYaw = leader.rot1;
+
+            // Leader to the companion's spot (same transform space, see Move)
+            leader.pos = companionPos;
+            leader.lastx = companionPos.x;
+            leader.lasty = companionPos.y;
+            leader.lastz = companionPos.z;
+            leader.rot1 = companionYaw;
+            ff9.w_moveCHRStatus[actor.index].id = s_groundId;
+
+            // Companion to where the leader stood
+            s_holder.transform.position = leaderPos;
+            s_yaw = leaderYaw;
+            s_holder.transform.rotation = Quaternion.Euler(0f, s_yaw, 0f);
+            s_groundId = -1;
+
+            Int32 old = cfg.LeaderPlayer;
+            cfg.LeaderPlayer = player;
+            Input.InputRouter.ForceRelease();
+            CoopLog.Message($"World map: P{player} swaps with P{old} to enter a location");
+            CoopBehaviour.Notify(Lang.T($"P{player} is now the leader", $"P{player} ist jetzt Leader"));
+        }
+
+        private static Int32 s_groundId = -1;
 
         private static String ChooseCharacter(WMActor leader)
         {
@@ -157,9 +207,15 @@ namespace FF9Coop.Game
             Vector3 forward = Quaternion.Euler(0f, leaderYaw, 0f) * new Vector3(0f, 0f, -1f);
             Vector3 p = leader.pos - forward * SpawnBehind;
             if (TryGround(ref p, out Int32 id))
+            {
                 p.y += Slice(leader, id, 1f, true); // z. B. im Wald sofort eingesunken erscheinen
+                s_groundId = id;
+            }
             else
+            {
                 p = leader.pos;
+                s_groundId = -1;
+            }
             s_holder.transform.position = p;
             s_yaw = leaderYaw;
             s_holder.transform.rotation = Quaternion.Euler(0f, s_yaw, 0f);
@@ -211,6 +267,8 @@ namespace FF9Coop.Game
             if (groundId >= 0)
                 next.y += Slice(leader, groundId, tps * Time.deltaTime, false);
             s_holder.transform.position = next;
+            if (groundId >= 0)
+                s_groundId = groundId; // pushing against a coast keeps the last valid tile
 
             Single target = Mathf.Atan2(-dir.x, -dir.z) * Mathf.Rad2Deg;
             s_yaw = Mathf.LerpAngle(s_yaw, target, 0.4f);

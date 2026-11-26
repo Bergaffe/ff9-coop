@@ -63,7 +63,7 @@ namespace FF9Coop.Game
                 CoopLog.Warning("EventCollision checks not found – companion interaction limited");
         }
 
-        private static void ReadButtons(CoopConfig cfg, Int32 player, out Boolean talk, out Boolean cards)
+        internal static void ReadButtons(CoopConfig cfg, Int32 player, out Boolean talk, out Boolean cards)
         {
             talk = cards = false;
             for (Int32 pad = 0; pad < PadInput.PadCount; pad++)
