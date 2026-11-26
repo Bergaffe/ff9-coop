@@ -5,3 +5,5 @@ obj/
 external/
 mod/FF9Coop/StreamingAssets/Scripts/*.dll
 mod/FF9Coop/StreamingAssets/Scripts/*.pdb
+Nexusmod_Upload/*
+!Nexusmod_Upload/ffix_multiplay_title.png

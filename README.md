@@ -24,7 +24,19 @@ Im Koop-Menü stellst du ein:
 
 Tasten und Haltedauer lassen sich in `FF9Coop.ini` ändern (`TurnRequestKey`, `LeaderKey`, `LeaderHoldSeconds`).
 
-## Stand: v0.6.0
+## Installation (Release)
+1. [Memoria](https://github.com/Albeoris/Memoria) bzw. Moguri Mod installieren.
+2. `FF9Coop-x.y.z.zip` aus den [Releases](../../releases) in den FF9-Spielordner entpacken (es entsteht der Ordner `FF9Coop`).
+3. Im Memoria-Launcher unter Mods „FF9 Coop“ aktivieren, oder in `Memoria.ini` unter `[Mod]` `FF9Coop` bei `FolderNames` vorne eintragen.
+
+## Stand: v0.8.0 (Beta)
+- **v0.8.0:** Farbige „Ich bin hier“-Hand mit Spielernummer über jeder Figur (Menü: Spieler-Hand)
+- **v0.7.0:**
+  - Begleiter kollidiert mit NPCs
+  - Begleiter versinkt auf der Weltkarte in Wald und Wasser
+  - Solo-Abschnitte als feste Menüoption
+  - Kampf: ATB-Pause bei Befehlswahl, Bereit-Signal, P1/P2-Markierung
+  - weitere Charaktere als Begleiter wählbar
 - **v0.6.0:**
   - Begleiter auf der Weltkarte (nur zu Fuß)
   - „Wer spielt …?“-Fenster in Solo-Abschnitten
