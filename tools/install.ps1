@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Installiert (oder entfernt) den FF9Coop-Mod-Ordner im Spiel und traegt ihn in Memoria.ini ein.
+  Installs (or removes) the FF9Coop mod folder in the game and registers it in Memoria.ini.
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File tools\install.ps1
@@ -10,7 +10,7 @@
 param(
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\FINAL FANTASY IX',
     [switch]$Uninstall,
-    # Ini-Datei des Mods beim Update nicht ueberschreiben (eigene Einstellungen behalten)
+    # Keep the mod's ini file on update (preserve your own settings)
     [switch]$KeepIni = $true
 )
 
@@ -20,9 +20,9 @@ $Source = Join-Path $PSScriptRoot "..\mod\$ModName"
 $Target = Join-Path $GameDir $ModName
 $Ini = Join-Path $GameDir 'Memoria.ini'
 
-if (-not (Test-Path $Ini)) { throw "Memoria.ini nicht gefunden in '$GameDir'. Ist Memoria installiert?" }
+if (-not (Test-Path $Ini)) { throw "Memoria.ini not found in '$GameDir'. Is Memoria installed?" }
 
-# --- Memoria.ini lesen (Kodierung inkl. BOM beibehalten) ---
+# --- Read Memoria.ini (keep encoding incl. BOM) ---
 $bytes = [IO.File]::ReadAllBytes($Ini)
 $hasBom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
 $text = [IO.File]::ReadAllText($Ini)
@@ -34,11 +34,11 @@ if (-not (Test-Path $backup)) {
 }
 
 function Update-ModList([string]$content, [string]$key, [bool]$add) {
-    # [^\r\n]* statt .* : bei CRLF-Dateien sonst das \r mitersetzen
+    # [^\r\n]* instead of .* : otherwise the \r of CRLF files gets replaced too
     $pattern = "(?m)^([ \t]*$key[ \t]*=[ \t]*)([^\r\n]*)"
     $m = [regex]::Match($content, $pattern)
     if (-not $m.Success) {
-        if ($add) { Write-Warning "$key nicht in Memoria.ini gefunden - bitte '$ModName' manuell im Launcher aktivieren." }
+        if ($add) { Write-Warning "$key not found in Memoria.ini - please enable '$ModName' manually in the launcher." }
         return $content
     }
     $items = @([regex]::Matches($m.Groups[2].Value, '"([^"]*)"') | ForEach-Object { $_.Groups[1].Value })
@@ -54,12 +54,12 @@ $text = Update-ModList $text 'Priorities' (-not $Uninstall)
 
 if ($Uninstall) {
     if (Test-Path $Target) { Remove-Item $Target -Recurse -Force }
-    Write-Host "$ModName entfernt und aus Memoria.ini ausgetragen."
+    Write-Host "$ModName removed and unregistered from Memoria.ini."
     return
 }
 
 if (-not (Test-Path (Join-Path $Source "StreamingAssets\Scripts\Memoria.Scripts.$ModName.dll"))) {
-    throw "Build fehlt. Erst bauen: dotnet build -c Release src\FF9Coop"
+    throw "Build missing. Build first: dotnet build -c Release src\FF9Coop"
 }
 
 New-Item -ItemType Directory -Force $Target | Out-Null
@@ -70,5 +70,5 @@ Get-ChildItem $Source -Recurse -File | ForEach-Object {
     New-Item -ItemType Directory -Force (Split-Path $dest) | Out-Null
     Copy-Item $_.FullName $dest -Force
 }
-Write-Host "$ModName installiert nach $Target"
+Write-Host "$ModName installed to $Target"
 Write-Host "Memoria.ini FolderNames:" ([regex]::Match($text, '(?m)^\s*FolderNames\s*=.*$').Value.Trim())

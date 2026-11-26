@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Nexusmod_Upload/ffix_multiplay_title.png" alt="Final Fantasy IX Multiplayer Mod" width="720">
+  <img src="docs/images/title.png" alt="Final Fantasy IX Multiplayer Mod" width="720">
 </p>
 
 <h1 align="center">FF9 Coop</h1>
