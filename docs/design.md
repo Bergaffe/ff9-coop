@@ -1,69 +1,43 @@
-# FF9 Coop – Design-Entscheidungen
+# FF9 Coop – Konzept & Architektur
 
-Stand: 2026-11-26 · Grundlage: [phase0-spike.md](phase0-spike.md)
-
-## Festgelegt
-| Thema | Entscheidung |
-|---|---|
-| Spielweise | Lokal (mehrere Controller) **und** online (Remote Play Together / Parsec → Remote-Spieler = zusätzliche Pads am Host) |
-| Spieleranzahl | 2 als Ziel, Architektur offen für bis zu 4 |
-| Kamera | Gemeinsame Kamera, **kein Splitscreen** |
-| Feld | Leader + Leine: Spieler 1 = Leader, Spieler 2 steuert sichtbare Begleiter-Figur |
-| Weltkarte | Vorerst nur Leader steuert (Übergabe per Taste); Begleiter auf der Weltkarte als spätere Phase |
+## Grundprinzip
+- **Nur der Host führt das Spiel aus.** Mitspieler sitzen lokal am selben PC oder sind über Steam Remote Play Together bzw. Parsec verbunden. Dann erscheinen sie am Host als zusätzliche Controller.
+- Die Mod verteilt die Eingaben: Je nach Situation nimmt das Spiel nur die Eingaben des Spielers an, der gerade dran ist. Eine Netzwerk-Synchronisation zweier Spielinstanzen ist dafür nicht nötig.
+- **Gemeinsame Kamera**, kein Splitscreen.
+- Ausgelegt für 2 Spieler, erweiterbar auf bis zu 4.
 
 ## Kampf
-- **Besitz:** Jeder Party-Slot (0–3) hat einen Besitzer (Spieler-ID). Standard: abwechselnd verteilt (Slot 0/2 → P1, Slot 1/3 → P2).
-- **Menü-Routing:** Wird ein Charakter aus der `ReadyQueue` aktiv (`BattleHUD.SwitchPlayer`), nimmt das Kommandomenü nur Eingaben vom Pad seines Besitzers an.
-- **Übernahme-Regel (optional, Config):** Ist ein Charakter bereit und sein Besitzer hängt gerade in einem anderen Menü, darf der andere Spieler ihn übernehmen.
-- **Ziel-Auswahl:** Gehört zum Besitzer des Menüs.
-- **Solo-/Gast-Kämpfe:** Zuweisung nach Regel. Ist nur ein Charakter spielbar, erscheint kurz ein Auswahl-Popup „Wer spielt?“ (Default: letzter Besitzer).
-- **ATB:** Bei Online-Spiel wird empfohlen, „Wait“ zu erzwingen (Config-Option).
+- Jeder Charakter hat einen Besitzer (einstellbar, sonst abwechselnd verteilt).
+- Das Kommandomenü eines bereiten Charakters reagiert nur auf den Controller seines Besitzers.
+- Ein wartender Spieler kann seinen bereiten Charakter per Tastendruck „anfordern“.
+- Optional: ATB-Pause während der Befehlswahl, Bereit-Signal, P1/P2-Markierung an den Charakternamen.
 
-## Feld – Leader + Leine
-**Rahmenbedingung:** Die Event-Engine kennt genau eine gesteuerte Figur (`EventEngine._context.controlUID`). Alle Auslöser hängen daran.
+## Feld und Weltkarte – Leader + Begleiter
+Die Event-Engine des Spiels kennt genau eine gesteuerte Figur. Darum gilt:
+- **Leader:** wie im Original. Er löst Ausgänge, Kämpfe, Cutscenes und Kartenwechsel aus.
+- **Begleiter:** zweiter Spieler mit eigener, sichtbarer Figur eines Party-Mitglieds.
+  - Läuft frei auf dem Walkmesh bzw. auf der Weltkarte und kollidiert mit NPCs.
+  - Kann NPCs ansprechen, Truhen öffnen, handeln und Tetra Master spielen.
+  - Hängt an einer „Leine“: Ist er zu weit weg oder wechselt die Karte, wird er zum Leader zurückgesetzt.
+  - In Cutscenes, Dialogen und Menüs ist er ausgeblendet.
+- **Leader-Wechsel** per gehaltener Taste, außerhalb von Events.
+- **Solo-Abschnitte** (die Story trennt die Gruppe): Auswahl, wer spielt, oder eine feste Regel.
+- Fahrzeuge auf der Weltkarte steuert der Leader.
+- Farbige „Ich bin hier“-Hand mit Spielernummer über jeder Figur.
 
-- **Leader (P1):** wie Vanilla. Er löst Ausgänge, Kämpfe, Cutscenes und Kartenwechsel aus.
-- **Begleiter (P2):**
-  - Zusätzliches Actor-Modell eines Party-Mitglieds (wählbar, Standard: nächster Party-Slot nach dem Leader).
-  - Läuft auf dem Walkmesh der aktuellen Karte, hat keine eigenen Story-Trigger.
-  - **Leine:** Ist der Begleiter über die maximale Distanz hinaus entfernt, nicht mehr im Bild oder wechselt die Karte, wird er zum Leader teleportiert bzw. neu gespawnt.
-  - **Interaktion:** P2 drückt „Bestätigen“ an NPC/Truhe → `controlUID` geht für diese eine Interaktion auf den Begleiter (bzw. Leader wird kurz stellvertretend positioniert) und danach zurück. Die Original-Skripte bleiben unverändert.
-- **Sichtbarkeit:**
-  - Der Begleiter ist nur sichtbar, solange `EventEngine.GetUserControl()` true ist.
-  - In Cutscenes, Dialogen und Menüs wird er ausgeblendet.
-  - Er wird auch ausgeblendet, wenn derselbe Charakter in der Szene bereits als NPC/Event-Objekt existiert.
-- **Solo-Szenen** (Party-Wechsel per Skript, z. B. Vivi allein in Alexandria): Popup „Wer spielt?“. Der Gewählte wird Leader, der andere hat keinen Begleiter (oder Zuschauer-Modus).
-- **Leader-Wechsel:** P1 kann die Leader-Rolle per Tastenkombination übergeben (nur außerhalb von Events).
-
-## Weltkarte (vorerst)
-- Ein Spieler steuert (Figur, Chocobo, Luftschiff). Übergabe per Tastenkombination.
-- Später (eigene Phase): Begleiter mit Leine. Vorher zu prüfen: Laden Feldmodelle in `WMWorld`? Wie funktioniert das Block-Streaming um den Mittelpunkt? Wie verhält sich ein dynamischer Kamera-Zoom?
-
-## Menüs, Dialoge, Minispiele
-- **Hauptmenü, Shops, Synthese:** Standard „jeder darf“. Option „nur Leader“.
-- **Dialogauswahl:** Leader. Option „jeder darf“.
-- **Minispiele** (Seilspringen, Chocobo-Hot&Cold, Tetra Master, Racing Hippaul …): Leader bzw. per Popup. Tetra Master PvP als spätere Idee.
-
-## Konfiguration & Persistenz
-- `FF9Coop.ini` im Mod-Ordner: Spielerzahl, Pad-Zuordnung, Übernahme-Regel, Leinen-Distanz, Wait erzwingen, Menü-Rechte.
-- **Besitz-Zuordnung je Spielstand** in einer Nebendatei (`FF9Coop_SlotX.json`). Das Original-Savegame bleibt unverändert.
-
-## Phasen (überarbeitet)
-| Phase | Inhalt |
-|---|---|
-| 1 ✅ | Mod-Gerüst (Memoria-Mod-DLL + Harmony), Multi-Pad-Input-Layer, Kampf-Besitz & Menü-Routing |
-| 2 ✅ | Feld: Leader-Wechsel, Solo-Szenen-Popup, Menü-/Dialog-Rechte |
-| 3 ✅ | Feld: Begleiter-Figur (Spawn, Bewegung, Leine, Ausblenden, Interaktion mit NPCs/Truhen/Shops) |
-| 4 | Online-Tests via Remote Play Together/Parsec, Latenz, Wait-Option |
-| 5 ✅ | Weltkarte: Begleiter mit Leine (zu Fuß) – Fahrzeuge steuert der Leader |
-| ✅ | Koop-Menü im FF9-Stil für alle Zuweisungen (K / L3+R3) |
-| 6 | Polish: Rollen-Overlay, Persistenz, Installer, Minispiel-Regeln, Coop-Profil (Export/Import von Mod-Liste + Settings für Host-Wechsel, mit Abgleich/Warnung) |
+## Menüs und Minispiele
+- Hauptmenü, Shops, Synthese: jeder oder nur der Leader (einstellbar).
+- Wer ein Gespräch beginnt, bedient auch dessen Auswahl.
+- Alle Zuweisungen lassen sich im Koop-Menü im FF9-Stil ändern, das Spiel pausiert solange.
 
 ## Mods im Multiplayer
-- Das Spiel läuft nur beim Host. Alle Mods und Einstellungen des Hosts (`Memoria.ini`) gelten automatisch. Gäste brauchen keine Mods.
-- Ein Abgleich ist nur beim **Host-Wechsel** nötig, weil Spielstände von Gameplay-Mods abhängen können. Dafür gibt es das Coop-Profil aus Phase 6.
-- Unsere DLL heißt `Memoria.Scripts.FF9Coop.dll` und wird von Memoria pro Mod-Ordner geladen (wie `Memoria.Scripts.AlternateFantasy.dll`). Sie ist deshalb von `MergeScripts = 0` nicht betroffen.
+- Das Spiel läuft nur beim Host. Alle Mods und Einstellungen des Hosts gelten automatisch. Gäste brauchen keine Mods.
+- Abgleich ist nur beim Wechsel des Hosts nötig, weil Spielstände von Gameplay-Mods abhängen können.
+- Die Mod ist ein eigener Memoria-Mod-Ordner und ersetzt keine Spieldateien. Ihre Patches sind additiv (Prefix/Postfix). Dadurch verträgt sie sich mit Moguri Mod und Gameplay-Mods wie AlternateFantasy.
 
-## Hauptrisiken
-- **Begleiter vs. Event-Skripte:** Doppelte Figuren, Kollisionen mit Skript-Bewegungen. Gegenmaßnahme: aggressives Ausblenden und eine Pflege-Liste pro Feld-ID.
-- **AlternateFantasy:** Patches nur additiv (Prefix/Postfix).
+## Mögliche Erweiterungen
+- Zuweisungen pro Spielstand speichern
+- Koop-Profil zum Teilen von Mod-Liste und Einstellungen beim Host-Wechsel
+- Sonderregeln für Minispiele
+- PlayStation-/Switch-Controller einzeln zuordnen
+- Mehrsprachigkeit (Englisch)

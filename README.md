@@ -2,9 +2,6 @@
 
 Koop-Multiplayer-Mod für **Final Fantasy IX (Steam)** auf Basis von [Memoria](https://github.com/Albeoris/Memoria). Kompatibel mit Moguri Mod.
 
-- Planung: [docs/design.md](docs/design.md)
-- Technische Analyse: [docs/phase0-spike.md](docs/phase0-spike.md)
-
 ## Steuerung
 | Aktion | Controller | Tastatur |
 |---|---|---|
@@ -45,14 +42,7 @@ Tasten und Haltedauer lassen sich in `FF9Coop.ini` ändern (`TurnRequestKey`, `L
 - **v0.4.0:** Koop-Menü im FF9-Stil (K / L3+R3)
 - **v0.3.0:** Sichtbare Begleiter-Figur im Feld
 - **v0.2.0:** Leader-Wechsel, „Zug anfordern“ per Tastatur, HUD-Einblendungen
-
-### Phase 1 (v0.1.0)
-- Mehrere XInput-Controller werden getrennt ausgewertet. Das Spiel sieht immer nur die Eingaben der Spieler, die gerade dran sind.
-- **Kampf:** Das Kommandomenü eines Charakters reagiert nur auf den Controller seines Besitzers (`[Owners]` in `FF9Coop.ini`).
-- **Zug anfordern:** Ist ein eigener Charakter bereit, holt der wartende Spieler ihn mit **Y/Dreieck**. Das geht nur, wenn das Hauptkommando-Menü offen ist.
-- **Feld, Weltkarte, Tetra Master:** Es steuert der Leader.
-- **Menüs:** Es darf jeder. Einstellbar mit `MenuControl = Leader`.
-- Ein HUD oben links zeigt, wer gerade dran ist.
+- **v0.1.0:** Getrennte Controller, Kampf-Koop (Kommandomenü nur für den Besitzer des Charakters), „Zug anfordern“, Status-HUD
 
 ## Bauen & installieren
 Voraussetzungen: .NET SDK (getestet mit 9.0), FF9 Steam mit Memoria (≥ 2025-07-13).
@@ -72,24 +62,10 @@ Das Install-Skript macht drei Dinge:
 
 Eine vorhandene `FF9Coop.ini` im Spiel wird bei Updates nicht überschrieben.
 
-## Testen (Phase 1)
-1. Spiel starten und bis zum Titelbildschirm warten.
-2. In `Memoria.log` im Spielordner müssen diese Zeilen stehen:
-   ```
-   [FF9Coop] Version 0.1.0 geladen aus …
-   [FF9Coop] Patch: GamePad.GetState
-   …
-   [FF9Coop] Initialisierung abgeschlossen
-   [FF9Coop] Laufzeit-Objekt erstellt
-   ```
-   Oben links erscheint `Koop · P1`.
-3. Mit **2 Controllern** einen Kampf starten (Prima Vista, erster Kampf).
-   - Die Startparty ist Zidane, Blank, Marcus und Cinna. Ohne Eintrag in `[Owners]` werden sie nach Slot verteilt: Slot 0/2 → P1, Slot 1/3 → P2.
-   - Erwartung: Öffnet sich das Menü für einen P2-Charakter, reagiert nur Pad 2. Das HUD zeigt dann `P2 · Kampf: Blank`.
-   - Ist ein P2-Charakter bereit, während P1 am Zug ist: Pad 2 drückt Y, und das Menü wechselt.
-4. **Mit nur einem Controller** greift die Ausfallsicherung. Pad 1 darf dann auch die Charaktere von P2 steuern.
-
-Fehler stehen ebenfalls mit `[FF9Coop]` in `Memoria.log`.
+## Läuft die Mod?
+- Oben links erscheint `Koop · P1`.
+- In `Memoria.log` im Spielordner stehen Zeilen mit `[FF9Coop]`, darunter `Initialisierung abgeschlossen`. Fehler stehen dort ebenfalls.
+- Ist nur ein Controller angeschlossen, darf dieser auch die Charaktere der anderen Spieler steuern.
 
 ## Fehlerbehebung
 - **Das Spiel startet nicht, Steam meldet „Anwendungssteuerungsrichtlinie hat diese Datei blockiert“:** Windows Smart App Control blockiert den nicht signierten Memoria-Launcher. Abhilfe schafft nur, Smart App Control abzuschalten (Windows-Sicherheit → App- & Browsersteuerung).
@@ -98,5 +74,7 @@ Fehler stehen ebenfalls mit `[FF9Coop]` in `Memoria.log`.
 
 ## Bekannte Einschränkungen
 - PlayStation- und Switch-Controller (über JoyShockLibrary) mischt Memoria in jeden XInput-Slot. Sie lassen sich noch nicht einem einzelnen Spieler zuordnen. Xbox-Controller und die virtuellen Pads von Steam Remote Play Together funktionieren.
-- Vibration geht immer an Pad 1.
 - Ist die Tastatur gesperrt, gelten auch Memoria-Hotkeys darüber als gesperrt (`GateKeyboard = 0` schaltet die Sperre ab).
+
+## Für Entwickler
+[Konzept](docs/design.md) · [Technische Notizen](docs/technik.md)
